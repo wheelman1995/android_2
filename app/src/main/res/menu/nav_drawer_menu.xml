@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/icon_group"
+        android:checkableBehavior="single">
+        <item
+            android:checkable="false"
+            android:id="@+id/nav_drawer_weather"
+            android:title="@string/weather" />
+    </group>
+
+
+    <group
+        android:id="@+id/icon_group2"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_drawer_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings" />
+        <item
+            android:id="@+id/nav_drawer_feedback"
+            android:icon="@drawable/ic_report"
+            android:title="@string/send_feedback" />
+        <item
+            android:id="@+id/nav_drawer_about"
+            android:icon="@drawable/ic_info_outline"
+            android:title="@string/about" />
+    </group>
+
+</menu>
