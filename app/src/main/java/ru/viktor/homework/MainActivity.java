@@ -2,8 +2,11 @@ package ru.viktor.homework;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -13,11 +16,21 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    private static final String TAG = "MainActivity";
 
     private DrawerLayout drawerLayout;
+    private SensorManager sensorManager;
+    private Sensor humSensor;
+    private Sensor tempSensor;
+    private TextView amb_temp_val;
+    private TextView amb_hum_val;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_drawer_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() != R.id.nav_drawer_weather) {
-                    item.setChecked(true);
-                    drawerLayout.closeDrawers();
-                }
-                return true;
+        navigationView.setNavigationItemSelectedListener(item -> {
+            if (item.getItemId() != R.id.nav_drawer_weather) {
+                item.setChecked(true);
+                drawerLayout.closeDrawers();
             }
+            return true;
         });
 
         Toolbar toolbar = findViewById(R.id.my_toolbar);
@@ -44,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         actionbar.setTitle(null);
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        humSensor = sensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+        tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
     }
 
     @Override
@@ -82,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -90,6 +103,66 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getStringType()) {
+            case "android.sensor.ambient_temperature":
+                amb_temp_val.setText(String.format(Locale.ENGLISH, "%.1f%s", event.values[0], getString(R.string.celsius)));
+                break;
+            case "android.sensor.relative_humidity":
+                float humidity = event.values[0];
+                amb_hum_val.setText(String.format(Locale.ENGLISH, "%.1f%%", humidity));
+                ((HumidityCustomView) findViewById(R.id.humidity_icon)).setDrawable(humidity > 70f ? R.drawable.humid : R.drawable.not_humid);
+                break;
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    protected void onPause() {
+        if (humSensor != null) {
+            sensorManager.unregisterListener(this, humSensor);
+        }
+        if (tempSensor != null) {
+            sensorManager.unregisterListener(this, tempSensor);
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (humSensor != null) {
+            sensorManager.registerListener(this, humSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            initAmbientHumidity();
+        }
+        if (tempSensor != null) {
+            sensorManager.registerListener(this, tempSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            initAmbientTemperature();
+        }
+    }
+
+    private void initAmbientTemperature() {
+        findViewById(R.id.constraint_ambient).setVisibility(View.VISIBLE);
+        findViewById(R.id.tv_amb_temp).setVisibility(View.VISIBLE);
+        amb_temp_val = findViewById(R.id.tv_amb_temp_val);
+        amb_temp_val.setVisibility(View.VISIBLE);
+    }
+
+    private void initAmbientHumidity() {
+        findViewById(R.id.constraint_ambient).setVisibility(View.VISIBLE);
+        findViewById(R.id.tv_amb_hum).setVisibility(View.VISIBLE);
+        findViewById(R.id.humidity_icon).setVisibility(View.VISIBLE);
+        amb_hum_val = findViewById(R.id.tv_amb_hum_val);
+        amb_hum_val.setVisibility(View.VISIBLE);
 
     }
 }

@@ -24,6 +24,74 @@
 
         </android.support.v7.widget.Toolbar>
 
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraint_ambient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/my_toolbar">
+
+            <TextView
+                android:id="@+id/tv_amb_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/ambient_temperature"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_amb_temp_val"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="180dp"
+                android:layout_marginTop="20dp"
+                android:gravity="end"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_amb_hum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="50dp"
+                android:text="@string/ambient_humidity"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_amb_hum_val"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="180dp"
+                android:layout_marginTop="50dp"
+                android:gravity="end"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ru.viktor.homework.HumidityCustomView
+                android:id="@+id/humidity_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/tv_amb_hum_val"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_amb_hum_val"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
     </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.NavigationView
@@ -32,8 +100,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:menu="@menu/nav_drawer_menu"
-        app:headerLayout="@layout/nav_drawer_header">
+        app:headerLayout="@layout/nav_drawer_header"
+        app:menu="@menu/nav_drawer_menu">
 
     </android.support.design.widget.NavigationView>
 
