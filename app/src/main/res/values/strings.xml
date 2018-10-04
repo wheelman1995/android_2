@@ -9,4 +9,6 @@
     <string name="ambient_temperature">Ambient temperature:</string>
     <string name="ambient_humidity">Ambient humidity:</string>
     <string name="celsius">\u2103</string>
+    <string name="service_description">This service is essential to provide weather updates</string>
+    <string name="no_data_available">No data available!</string>
 </resources>

@@ -10,8 +10,8 @@ import android.view.View;
 
 public class HumidityCustomView extends View {
 
-    Drawable drawable;
-    Rect rect;
+    private Drawable drawable;
+    private Rect rect;
 
     public HumidityCustomView(Context context) {
         super(context);

@@ -1,12 +1,15 @@
 package ru.viktor.homework;
 
 import android.app.SearchManager;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,12 +17,21 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkStatus;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -58,6 +70,47 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         humSensor = sensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
         tempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+
+//         Create the observer which updates the UI.
+        Observer<WorkStatus> observer = new Observer<WorkStatus>() {
+            @Override
+            public void onChanged(@Nullable WorkStatus status) {
+                // Update the UI
+                if (status != null && status.getState().isFinished()) {
+                    String data = status.getOutputData().getString("data");
+                    Log.d(TAG, data );
+                }
+            }
+        };
+
+//        Observer<List<WorkStatus>> observer = new Observer<List<WorkStatus>>() {
+//            @Override
+//            public void onChanged(@Nullable List<WorkStatus> statuses) {
+//                // Update the UI
+//                for (int i = 0; i < statuses.size(); i++) {
+//                    if (statuses.get(i) != null)
+//                    Log.d(TAG, statuses.get(i).getOutputData().getString("data"));
+//                }
+//            }
+//        };
+
+        OneTimeWorkRequest weatherUpdateWork = new OneTimeWorkRequest.Builder(WeatherUpdateWorker.class)
+                .setInputData(new Data.Builder().putString("city", "pskov").build())
+                .build();
+
+//        PeriodicWorkRequest.Builder weatherUpdateWorkBuilder = new PeriodicWorkRequest.Builder(WeatherUpdateWorker.class, 15, TimeUnit.MINUTES).addTag("tag");
+//        weatherUpdateWorkBuilder.setInputData(new Data.Builder().putString("city", "pskov").build());
+//        PeriodicWorkRequest weatherUpdateWork = weatherUpdateWorkBuilder.build();
+        WorkManager.getInstance().enqueue(weatherUpdateWork);
+
+        // Observe the LiveData, passing in this activity as the LifecycleOwner and the observer
+        WorkManager.getInstance().getStatusById(weatherUpdateWork.getId())
+                .observe(this, observer);
+//        WorkManager.getInstance().getStatusesByTag("tag")
+//                .observe(this, observer);
+
+//        Intent intent = new Intent(getApplicationContext(), WeatherUpdateService.class);
+//        WeatherUpdateService.enqueueWork(this, intent);
     }
 
     @Override
@@ -94,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 
     @Override
