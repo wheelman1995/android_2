@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ru.viktor.homework">
+    package="ru.wheelman.weather">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature
         android:name="android.sensor.ambient_temperature"
@@ -13,10 +13,9 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".MainActivity">
+        <activity android:name="ru.wheelman.weather.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +26,7 @@
         </activity>
 
         <activity
-            android:name=".SearchableActivity"
+            android:name="ru.wheelman.weather.SearchableActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -36,7 +35,8 @@
                 android:resource="@xml/searchable"/>
         </activity>
 
-        <service android:name=".WeatherUpdateService"
+        <service
+            android:name="ru.wheelman.weather.WeatherUpdateService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:description="@string/service_description"

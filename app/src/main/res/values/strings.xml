@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">homework</string>
+    <string name="app_name">Weather</string>
     <string name="search">search</string>
     <string name="search_city">Search a city</string>
     <string name="settings">Settings</string>
@@ -13,9 +13,15 @@
     <string name="service_description">This service is essential to provide weather updates</string>
     <string name="no_data_available">No data available!</string>
     <string name="temp_units_setting_question">What weather temperature units do you prefer?</string>
+    <string name="current_weather">Current weather</string>
+    <string name="data_receiving_time">as of:</string>
+    <string name="temperature">Temperature</string>
+    <string name="searching_for_cities">Searching for cities…</string>
+    <string name="empty_list_view">@string/searching_for_cities</string>
 
     <string-array name="temp_setting_values">
         <item>Celsius</item>
         <item>Fahrenheit</item>
     </string-array>
+
 </resources>

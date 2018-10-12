@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cl_amb_conditions"
     android:layout_width="match_parent"
@@ -20,7 +20,7 @@
         android:id="@+id/tv_amb_temp_val"
         android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="180dp"
+        android:layout_marginStart="150dp"
         android:layout_marginTop="20dp"
         android:gravity="end"
         android:visibility="gone"
@@ -42,14 +42,14 @@
         android:id="@+id/tv_amb_hum_val"
         android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="180dp"
+        android:layout_marginStart="150dp"
         android:layout_marginTop="50dp"
         android:gravity="end"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ru.viktor.homework.HumidityCustomView
+    <ru.wheelman.weather.HumidityCustomView
         android:id="@+id/humidity_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -70,4 +70,4 @@
         android:background="?android:attr/listDivider" />
 
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
