@@ -8,16 +8,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
+import ru.wheelman.weather.model.AboutFragment;
 
 public class MainActivity extends AppCompatActivity implements SettingsFragment.SettingsChangedListener {
 
@@ -28,10 +33,10 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     private AmbientConditionsFragment ambientConditionsFragment;
     private MainFragment mainFragment;
     private NavigationView navigationView;
-
-    public NavigationView getNavigationView() {
-        return navigationView;
-    }
+    private boolean homeReturnsUp;
+    private AboutFragment aboutFragment;
+    private ImageView navDrawerHeaderForeground;
+    private ConstraintLayout navDrawerHeaderLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +48,16 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
         initListeners();
 
+        initCityListDatabase();
+
         initActionBar();
 
         initFragments();
 
+    }
+
+    private void initCityListDatabase() {
+        CityListDatabase.init(getApplication());
     }
 
     private void initFragments() {
@@ -95,7 +106,8 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     private void initVariables() {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_drawer_view);
-
+        navDrawerHeaderForeground = findViewById(R.id.image_nav_drawer_header_foreground);
+        navDrawerHeaderLayout = (ConstraintLayout) navigationView.getHeaderView(0);
     }
 
     private void initListeners() {
@@ -104,6 +116,9 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                 case R.id.nav_drawer_settings:
                     Log.d(TAG, "nav_drawer_settings pressed");
                     showSettingsFragment();
+                    break;
+                case R.id.nav_drawer_about:
+                    showAboutDialog();
                     break;
             }
 
@@ -119,10 +134,54 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             public void onBackStackChanged() {
                 if (!settingsFragment.isVisible()) {
                     navigationView.getMenu().findItem(R.id.nav_drawer_settings).setChecked(false);
+                    homeReturnsUp = false;
+                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                } else {
+                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+                    homeReturnsUp = true;
                 }
             }
         });
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                Log.d(TAG, slideOffset + " slideOffset ");
+            }
 
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+
+
+    }
+
+
+    private void showAboutDialog() {
+        aboutFragment = AboutFragment.newInstance();
+        aboutFragment.setListener(new AboutFragment.Listener() {
+            @Override
+            public void onDismiss() {
+                if (aboutFragment != null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .remove(aboutFragment)
+                            .commit();
+                }
+                navigationView.getMenu().findItem(R.id.nav_drawer_about).setChecked(false);
+            }
+        });
+        aboutFragment.show(getSupportFragmentManager(), "AboutFragment");
     }
 
     private void showSettingsFragment() {
@@ -130,12 +189,12 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             getSupportFragmentManager().beginTransaction()
                     .remove(settingsFragment)
                     .commit();
-            getSupportFragmentManager().popBackStackImmediate("settingsFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getSupportFragmentManager().popBackStackImmediate("SettingsFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
         settingsFragment = SettingsFragment.newInstance(this);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fl_main, settingsFragment, null)
-                .addToBackStack("settingsFragment")
+                .addToBackStack("SettingsFragment")
                 .commit();
     }
 
@@ -159,22 +218,23 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             }
         });
 
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                search.collapseActionView();
+                return false;
+            }
+        });
+
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(true);
 
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                return true;
-//            }
-//        });
         return true;
     }
 
@@ -183,7 +243,13 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
+                if (homeReturnsUp) {
+                    homeReturnsUp = false;
+                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                    onBackPressed();
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -234,5 +300,4 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         return Units.getUnitByIndex(getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE)
                 .getInt(Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY, Units.CELSIUS.getUnitIndex()));
     }
-
 }

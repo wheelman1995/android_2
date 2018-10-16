@@ -2,27 +2,58 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+
     defaultConfig {
+        def VERSION_MAJOR = 1
+        def VERSION_MINOR = 2
+        def VERSION_PATCH = 0
+
         applicationId 'ru.wheelman.weather'
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+
+//        def versionPropsFile = file('version.properties')
+//        Properties versionProps = new Properties()
+//        if (!versionPropsFile.exists()) {
+//            versionProps['versionCode'] = "0"
+//            versionProps.store(versionPropsFile.newWriter(), null)
+//        }
+//
+//        if (versionPropsFile.canRead()) {
+//            versionProps.load(new FileInputStream(versionPropsFile))
+//
+//            versionProps['versionCode'] = (Integer.valueOf(versionProps['versionCode']) + 1).toString()
+//
+//            versionProps.store(versionPropsFile.newWriter(), null)
+//
+//        } else {
+//            throw new FileNotFoundException("Could not read version.properties!")
+//        }
+
+//        versionCode = Integer.valueOf(versionProps['versionCode'])
+
+
+        versionCode = (VERSION_MAJOR * 100 + VERSION_MINOR * 10 + VERSION_PATCH) - 99
+        versionName = String.format(Locale.UK, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR , VERSION_PATCH)
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '28.0.3'
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     productFlavors {
     }
+
     packagingOptions {
         exclude 'META-INF/proguard/androidx-annotations.pro'
     }

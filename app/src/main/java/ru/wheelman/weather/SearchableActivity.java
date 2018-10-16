@@ -3,18 +3,13 @@ package ru.wheelman.weather;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -33,9 +28,10 @@ public class SearchableActivity extends ListActivity {
 
     private ContentLoadingProgressBar progressBar;
     private TextView empty;
-    private Task task;
     private ArrayList<City> cityList;
     private int unitIndex;
+    private Intent intent;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,43 +40,95 @@ public class SearchableActivity extends ListActivity {
 
         initVariables();
 
-        search();
+        onNewIntent();
+    }
+
+    private void loadWeather() {
+        int cityId = Integer.parseInt(intent.getDataString());
+        onNewCitySelected(cityId);
+
     }
 
     private void initVariables() {
         progressBar = findViewById(R.id.pb_cities);
         empty = findViewById(android.R.id.empty);
-        task = new Task();
-        cityList = new ArrayList<>();
+        cityList = CityListDatabase.getMatchedCities();
         unitIndex = getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE)
                 .getInt(Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY, Units.CELSIUS.getUnitIndex());
+
+        adapter = new ArrayAdapter<String>(this, R.layout.activity_searchable_adapter_item, R.id.search_adapter_item);
+        setListAdapter(adapter);
+    }
+
+    private void onNewIntent() {
+        intent = getIntent();
+
+        switch (intent.getAction()) {
+            case Intent.ACTION_SEARCH:
+                search();
+                break;
+            case Intent.ACTION_VIEW:
+                loadWeather();
+                break;
+        }
     }
 
     private void search() {
-        Intent intent = getIntent();
-        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            AsyncTask.Status status = task.getStatus();
-            if (status == AsyncTask.Status.RUNNING) {
-                task.cancel(true);
+
+        String query = intent.getStringExtra(SearchManager.QUERY);
+
+        CityListDatabase.getInstance().findCitiesBeginningWith(new CityListDatabase.JobProgressListener() {
+
+
+            @Override
+            public <T> void onJobDone(T t) {
+//                cityList = (ArrayList<City>) t;
+
+                progressBar.hide();
+
+//                String[] data = new String[cityList.size()];
+
+//                for (int i = 0; i < cityList.size(); i++) {
+//                    data[i] = String.format(Locale.UK, "%s, %s", cityList.get(i).getName(), cityList.get(i).getCountry());
+//                }
+
+
+                if (adapter.getCount() == 0) {
+                    empty.setText(getString(R.string.no_data_available));
+                    empty.setTextColor(getResources().getColor(R.color.red));
+                }
             }
-            task.execute(query);
-        }
+
+            @Override
+            public <T> void onProgressUpdate(int progress) {
+                progressBar.setProgress(progress);
+                Log.d(TAG, String.valueOf(cityList.size()));
+
+                for (int i = adapter.getCount(); i < cityList.size(); i++) {
+                    adapter.add(String.format(Locale.UK, "%s, %s", cityList.get(i).getName(), cityList.get(i).getCountry()));
+                }
+            }
+        }, query);
+
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         setIntent(intent);
-        search();
+        onNewIntent();
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         City selectedCity = cityList.get(position);
+        int cityId = selectedCity.getId();
+        onNewCitySelected(cityId);
+    }
 
-        getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE).edit().putInt(Constants.SHARED_PREFERENCES_CURRENT_CITY_ID, selectedCity.getId()).apply();
+    private void onNewCitySelected(int cityId) {
+        getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE).edit().putInt(Constants.SHARED_PREFERENCES_CURRENT_CITY_ID, cityId).apply();
 
-        updateWeather(selectedCity.getId());
+        updateWeather(cityId);
 
         finish();
     }
@@ -99,60 +147,60 @@ public class SearchableActivity extends ListActivity {
         WorkManager.getInstance().beginUniqueWork(Constants.WORK_MANAGER_WEATHER_ONE_TIME_UPDATE_TAG, ExistingWorkPolicy.REPLACE, updateWeatherWork).enqueue();
     }
 
-    private class Task extends AsyncTask<String, Integer, ArrayList<City>> {
-
-        @Override
-        protected ArrayList<City> doInBackground(String... strings) {
-            cityList.clear();
-
-            Gson gson = new Gson();
-            JsonReader jsonReader = new JsonReader(new InputStreamReader((getResources().openRawResource(R.raw.city_list))));
-
-            try {
-                City[] city = gson.fromJson(jsonReader, City[].class);
-                int percent = city.length / 100;
-                int done = 0;
-                for (int i = 0; i < city.length; i++) {
-                    if (city[i].getName().toLowerCase().startsWith(strings[0].toLowerCase())) {
-                        cityList.add(city[i]);
-                    }
-                    done = i / percent;
-                    if (done * percent == i) {
-                        publishProgress(done);
-                    }
-                }
-
-                jsonReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return cityList;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            progressBar.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<City> cities) {
-            progressBar.hide();
-            String[] data = new String[cities.size()];
-            for (int i = 0; i < cities.size(); i++) {
-                data[i] = String.format(Locale.UK, "%s, %s", cities.get(i).getName(), cities.get(i).getCountry());
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchableActivity.this, R.layout.activity_searchable_adapter_item, R.id.search_adapter_item, data);
-//            adapter.sort(new Comparator<String>() {
-//                @Override
-//                public int compare(String o1, String o2) {
-//                    return Collator.getInstance().compare(o1, o2);
+//    private class Task extends AsyncTask<String, Integer, ArrayList<City>> {
+//
+//        @Override
+//        protected ArrayList<City> doInBackground(String... strings) {
+//            cityList.clear();
+//
+//            Gson gson = new Gson();
+//            JsonReader jsonReader = new JsonReader(new InputStreamReader((getResources().openRawResource(R.raw.city_list))));
+//
+//            try {
+//                City[] city = gson.fromJson(jsonReader, City[].class);
+//                int percent = city.length / 100;
+//                int done = 0;
+//                for (int i = 0; i < city.length; i++) {
+//                    if (city[i].getName().toLowerCase().startsWith(strings[0].toLowerCase())) {
+//                        cityList.add(city[i]);
+//                    }
+//                    done = i / percent;
+//                    if (done * percent == i) {
+//                        publishProgress(done);
+//                    }
 //                }
-//            });
-            setListAdapter(adapter);
-            if (data.length == 0) {
-                empty.setText(getString(R.string.no_data_available));
-                empty.setTextColor(getResources().getColor(R.color.red));
-            }
-        }
-    }
+//
+//                jsonReader.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return cityList;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Integer... values) {
+//            progressBar.setProgress(values[0]);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<City> cities) {
+//            progressBar.hide();
+//            String[] data = new String[cities.size()];
+//            for (int i = 0; i < cities.size(); i++) {
+//                data[i] = String.format(Locale.UK, "%s, %s", cities.get(i).getName(), cities.get(i).getCountry());
+//            }
+//            ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchableActivity.this, R.layout.activity_searchable_adapter_item, R.id.search_adapter_item, data);
+////            adapter.sort(new Comparator<String>() {
+////                @Override
+////                public int compare(String o1, String o2) {
+////                    return Collator.getInstance().compare(o1, o2);
+////                }
+////            });
+//            setListAdapter(adapter);
+//            if (data.length == 0) {
+//                empty.setText(getString(R.string.no_data_available));
+//                empty.setTextColor(getResources().getColor(R.color.red));
+//            }
+//        }
+//    }
 }

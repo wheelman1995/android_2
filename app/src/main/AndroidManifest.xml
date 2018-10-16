@@ -35,13 +35,10 @@
                 android:resource="@xml/searchable"/>
         </activity>
 
-        <service
-            android:name="ru.wheelman.weather.WeatherUpdateService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:description="@string/service_description"
-            android:enabled="true"/>
-
+        <provider
+            android:name="ru.wheelman.weather.SearchSuggestionsProvider"
+            android:authorities="ru.wheelman.weather.provider.SearchSuggestions"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -11,7 +11,7 @@ public class WeatherData {
     private int id;
 
     @ColumnInfo(name = "temperature")
-    private float temperature;
+    private String temperature;
 
     @ColumnInfo(name = "dt")
     private long dt;
@@ -46,11 +46,11 @@ public class WeatherData {
         this.id = id;
     }
 
-    public float getTemperature() {
+    public String getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(float temperature) {
+    public void setTemperature(String temperature) {
         this.temperature = temperature;
     }
 

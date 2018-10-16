@@ -124,21 +124,22 @@ public class AmbientConditionsFragment extends Fragment implements SensorEventLi
         switch (event.sensor.getStringType()) {
             case "android.sensor.ambient_temperature":
                 float t = event.values[0];
-                String tempUnits = null;
+//                String tempUnits = null;
                 switch (unit) {
                     case CELSIUS:
-                        tempUnits = getString(R.string.celsius);
+//                        tempUnits = getString(R.string.celsius);
+                        amb_temp_val.setText(getString(R.string.celsius, t));
                         break;
                     case FAHRENHEIT:
                         t = t * 9 / 5 + 32;
-                        tempUnits = getString(R.string.fahrenheit);
+//                        tempUnits = getString(R.string.fahrenheit);
+                        amb_temp_val.setText(getString(R.string.fahrenheit, t));
                         break;
                 }
-                amb_temp_val.setText(String.format(Locale.ENGLISH, "%.1f%s", t, tempUnits));
                 break;
             case "android.sensor.relative_humidity":
                 float humidity = event.values[0];
-                amb_hum_val.setText(String.format(Locale.ENGLISH, "%.1f%%", humidity));
+                amb_hum_val.setText(String.format(Locale.UK, "%.1f%%", humidity));
                 ((HumidityCustomView) getView().findViewById(R.id.humidity_icon)).setDrawable(humidity > 70f ? R.drawable.humid : R.drawable.not_humid);
                 break;
         }

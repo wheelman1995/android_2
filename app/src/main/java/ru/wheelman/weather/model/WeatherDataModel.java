@@ -24,6 +24,8 @@ public class WeatherDataModel implements Parcelable {
     private Sys sys;
     @SerializedName("dt")
     private long dt;
+    @SerializedName("id")
+    private int id;
     @SerializedName("main")
     private Main main;
 
@@ -33,6 +35,14 @@ public class WeatherDataModel implements Parcelable {
     protected WeatherDataModel(Parcel in) {
         dt = in.readLong();
         main = in.readParcelable(ClassLoader.getSystemClassLoader());
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

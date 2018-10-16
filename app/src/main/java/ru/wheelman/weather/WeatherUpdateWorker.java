@@ -1,9 +1,9 @@
 package ru.wheelman.weather;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -40,15 +40,19 @@ public class WeatherUpdateWorker extends Worker {
         OpenWeather openWeather = retrofit.create(OpenWeather.class);
 
         String queryUnit = null;
+        String unitSymbol = null;
         switch (unit) {
             case CELSIUS:
                 queryUnit = Constants.QUERY_CELSIUS;
+                unitSymbol = context.getString(R.string.celsius);
                 break;
             case FAHRENHEIT:
                 queryUnit = Constants.QUERY_FAHRENHEIT;
+                unitSymbol = context.getString(R.string.fahrenheit);
                 break;
             default:
                 queryUnit = Constants.QUERY_CELSIUS;
+                unitSymbol = context.getString(R.string.celsius);
         }
 
         Call<WeatherDataModel> call = openWeather.loadWeatherData(cityId, queryUnit, Constants.API_KEY);
@@ -64,9 +68,9 @@ public class WeatherUpdateWorker extends Worker {
         WeatherDataModel data = response.body();
 
         WeatherData weatherData = new WeatherData();
-        weatherData.setId(1);
+        weatherData.setId(data.getId());
         weatherData.setDt(data.getDt());
-        weatherData.setTemperature(data.getMain().getTemp());
+        weatherData.setTemperature(String.format(Locale.UK, unitSymbol, data.getMain().getTemp()));
         weatherData.setCity(data.getName());
         weatherData.setCountry(data.getSys().getCountry());
         Database db = Database.getDatabase(getApplicationContext());
@@ -84,7 +88,6 @@ public class WeatherUpdateWorker extends Worker {
 //                .putString("data", city)
 //                .build();
 //        setOutputData(output);
-        Log.d(TAG, "work done");
 
         return Result.SUCCESS;
     }

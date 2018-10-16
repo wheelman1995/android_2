@@ -3,7 +3,6 @@ package ru.wheelman.weather;
 import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -42,10 +42,11 @@ public class MainFragment extends Fragment {
     private BroadcastReceiver bReceiver;
     private WeatherViewModel weatherViewModel;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
-    private String unitsStringRes;
+    //    private String unitsStringRes;
     private PeriodicWorkRequest weatherUpdateWork;
     private int cityId;
     private int unitIndex;
+    private Observer<WeatherData> weatherDataObserver;
 
     public static MainFragment newInstance() {
         MainFragment f = new MainFragment();
@@ -73,7 +74,24 @@ public class MainFragment extends Fragment {
         cityId = sp.getInt(Constants.SHARED_PREFERENCES_CURRENT_CITY_ID, -1);
         unitIndex = sp.getInt(Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY, Units.CELSIUS.getUnitIndex());
 
-        initUnitStringResource(unitIndex);
+    }
+
+//    private void chooseUnitStringResource() {
+//        switch (Units.getUnitByIndex(unitIndex)) {
+//            case CELSIUS:
+//                unitsStringRes = getString(R.string.celsius);
+//                break;
+//            case FAHRENHEIT:
+//                unitsStringRes = getString(R.string.fahrenheit);
+//                break;
+//        }
+//    }
+
+    private void onUnitsChanged() {
+        createPeriodicWork(cityId, unitIndex, true);
+    }
+
+    private void initListeners() {
 
         onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -90,32 +108,39 @@ public class MainFragment extends Fragment {
                 }
             }
         };
-    }
 
-    private void initUnitStringResource(int unitIndex) {
-        switch (Units.getUnitByIndex(unitIndex)) {
-            case CELSIUS:
-                unitsStringRes = getString(R.string.celsius);
-                break;
-            case FAHRENHEIT:
-                unitsStringRes = getString(R.string.fahrenheit);
-                break;
-        }
-    }
+        weatherDataObserver = new Observer<WeatherData>() {
+            @Override
+            public void onChanged(WeatherData weatherData) {
+                ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+                if (weatherData == null) {
+                    actionBar.setTitle(getString(R.string.waiting_for_data));
+                    dataReceivingTime.setText(getString(R.string.not_applicable));
+                    currentTemperature.setText(getString(R.string.not_applicable));
+                }
+                if (weatherData != null) {
+                    Date date = new Date(weatherData.getDt() * 1000L);
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM, HH:mm", Locale.UK);
+                    sdf.setTimeZone(TimeZone.getDefault());
 
-    private void onUnitsChanged() {
-        initUnitStringResource(unitIndex);
 
-        createPeriodicWork(cityId, unitIndex, true);
-        Log.d(TAG, "units changed");
-    }
+                    dataReceivingTime.setText(sdf.format(date));
 
-    private void initListeners() {
+//                    chooseUnitStringResource();
+
+                    currentTemperature.setText(weatherData.getTemperature());
+
+                    actionBar.setTitle(String.format(Locale.UK, "%s, %s", weatherData.getCity(), weatherData.getCountry()));
+                }
+            }
+        };
+
         getActivity().getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE).registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     private void onNewCitySelected() {
         createPeriodicWork(cityId, unitIndex, true);
+        subscribeForDataUpdates();
     }
 
     @Nullable
@@ -210,22 +235,7 @@ public class MainFragment extends Fragment {
     }
 
     private void subscribeForDataUpdates() {
-        weatherViewModel.getWeatherData().observe(this, new Observer<WeatherData>() {
-            @Override
-            public void onChanged(WeatherData weatherData) {
-                if (weatherData != null) {
-                    Date date = new Date(weatherData.getDt() * 1000L);
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM, HH:mm", Locale.UK);
-                    sdf.setTimeZone(TimeZone.getDefault());
-
-
-                    dataReceivingTime.setText(sdf.format(date));
-                    currentTemperature.setText(String.format(Locale.UK, "%.1f%s", weatherData.getTemperature(), unitsStringRes));
-
-                    ((MainActivity) getActivity()).getSupportActionBar().setTitle(String.format(Locale.UK, "%s, %s", weatherData.getCity(), weatherData.getCountry()));
-                }
-            }
-        });
+        weatherViewModel.getWeatherData(cityId).observe(this, weatherDataObserver);
     }
 
     @Override
@@ -250,6 +260,12 @@ public class MainFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+//        Log.d(TAG, String.valueOf(item.getItemId()));
+//        switch (item.getItemId()) {
+//            case android.R.id.home:
+//                getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+//                return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 

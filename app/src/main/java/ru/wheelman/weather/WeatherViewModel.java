@@ -16,10 +16,11 @@ public class WeatherViewModel extends AndroidViewModel {
     public WeatherViewModel(@NonNull Application application) {
         super(application);
         createDb();
-        weatherData = db.weatherDataDAO().getData();
+
     }
 
-    public LiveData<WeatherData> getWeatherData() {
+    public LiveData<WeatherData> getWeatherData(int cityId) {
+        weatherData = db.weatherDataDAO().getDataByCityId(cityId);
         return weatherData;
     }
 
