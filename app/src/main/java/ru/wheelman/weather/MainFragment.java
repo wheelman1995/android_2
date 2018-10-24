@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -177,19 +176,16 @@ public class MainFragment extends Fragment {
 
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(dataUpdateStatusReceiver, new IntentFilter(WeatherUpdateWorker.ACTION_NEW_DATA_RECEIVED));
 
-        onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                switch (key) {
-                    case Constants.SHARED_PREFERENCES_CURRENT_CITY_ID:
-                        cityId = sharedPreferences.getInt(key, SearchSuggestionsProvider.CURRENT_LOCATION_SUGGESTION_ID);
-                        onNewCitySelected();
-                        break;
-                    case Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY:
-                        unitIndex = sharedPreferences.getInt(key, Units.CELSIUS.getUnitIndex());
-                        onUnitsChanged();
-                        break;
-                }
+        onSharedPreferenceChangeListener = (sharedPreferences, key) -> {
+            switch (key) {
+                case Constants.SHARED_PREFERENCES_CURRENT_CITY_ID:
+                    cityId = sharedPreferences.getInt(key, SearchSuggestionsProvider.CURRENT_LOCATION_SUGGESTION_ID);
+                    onNewCitySelected();
+                    break;
+                case Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY:
+                    unitIndex = sharedPreferences.getInt(key, Units.CELSIUS.getUnitIndex());
+                    onUnitsChanged();
+                    break;
             }
         };
 
@@ -296,12 +292,7 @@ public class MainFragment extends Fragment {
                 }
             }
         };
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshManually();
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(this::refreshManually);
     }
 
     void refreshManually() {
@@ -342,12 +333,9 @@ public class MainFragment extends Fragment {
         builder.setTitle(getString(R.string.rationale_title))
                 .setIcon(R.drawable.rationale_icon)
                 .setMessage(R.string.location_permission_rationale)
-                .setPositiveButton(R.string.location_permission_rationale_positive_button, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                .setPositiveButton(R.string.location_permission_rationale_positive_button, (dialog, which) -> {
 //                        getActivity().onBackPressed();
-                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
-                    }
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
                 });
         builder.create().show();
     }
@@ -373,11 +361,8 @@ public class MainFragment extends Fragment {
         builder.setTitle(getString(R.string.permission_denied_warning_title))
                 .setIcon(R.drawable.location_permission_denied_warning_icon)
                 .setMessage(R.string.location_permission_denied_warning)
-                .setPositiveButton(R.string.location_permission_warning_positive_button, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                .setPositiveButton(R.string.location_permission_warning_positive_button, (dialog, which) -> {
 //                        getActivity().onBackPressed();
-                    }
                 });
         builder.create().show();
     }

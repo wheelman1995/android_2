@@ -51,7 +51,7 @@ public class SearchableActivity extends ListActivity {
         unitIndex = getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE)
                 .getInt(Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY, Units.CELSIUS.getUnitIndex());
 
-        adapter = new ArrayAdapter<String>(this, R.layout.activity_searchable_adapter_item, R.id.search_adapter_item);
+        adapter = new ArrayAdapter<>(this, R.layout.activity_searchable_adapter_item, R.id.search_adapter_item);
         setListAdapter(adapter);
     }
 

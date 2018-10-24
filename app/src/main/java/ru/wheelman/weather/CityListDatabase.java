@@ -22,11 +22,11 @@ public class CityListDatabase {
         matchedCities = new ArrayList<>();
     }
 
-    public static ArrayList<City> getMatchedCities() {
+    static ArrayList<City> getMatchedCities() {
         return matchedCities;
     }
 
-    public static void init(Application application) {
+    static void init(Application application) {
         app = application;
     }
 
@@ -47,14 +47,14 @@ public class CityListDatabase {
         }
     }
 
-    public void findCitiesBeginningWith(JobProgressListener jobProgressListener, String query) {
+    void findCitiesBeginningWith(JobProgressListener jobProgressListener, String query) {
 
         DatabaseTask databaseTask = new DatabaseTask();
-        databaseTask.setJobProgressListener(jobProgressListener);
+        DatabaseTask.setJobProgressListener(jobProgressListener);
         databaseTask.execute(FIND_CITIES_BEGINNING_WITH, query);
     }
 
-    public ArrayList<City> findCitiesBeginningWith(String query) {
+    ArrayList<City> findCitiesBeginningWith(String query) {
         if (!initialized) {
             initialize();
         }
@@ -74,12 +74,12 @@ public class CityListDatabase {
         <T> void onProgressUpdate(int progress);
     }
 
-    private class DatabaseTask extends AsyncTask<String, Integer, Object> {
+    private static class DatabaseTask extends AsyncTask<String, Integer, Object> {
 
-        private JobProgressListener jobProgressListener;
+        private static JobProgressListener jobProgressListener;
 
-        void setJobProgressListener(JobProgressListener jobProgressListener) {
-            this.jobProgressListener = jobProgressListener;
+        static void setJobProgressListener(JobProgressListener jobProgressListener) {
+            DatabaseTask.jobProgressListener = jobProgressListener;
         }
 
         @Override
@@ -96,7 +96,7 @@ public class CityListDatabase {
                     matchedCities.clear();
                     String query = strings[1];
                     int percent = cities.length / 100;
-                    int doneInPercents = 0;
+                    int doneInPercents;
                     for (int i = 0; i < cities.length; i++) {
                         doneInPercents = i / percent;
                         if (cities[i].getName().toLowerCase().startsWith(query.toLowerCase())) {

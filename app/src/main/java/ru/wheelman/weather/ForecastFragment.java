@@ -70,12 +70,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private void initListeners() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                ((MainActivity) getActivity()).getMainFragment().refreshManually();
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> ((MainActivity) getActivity()).getMainFragment().refreshManually());
 
         dataUpdateStatusReceiver = new BroadcastReceiver() {
             @Override
@@ -161,15 +156,12 @@ public class ForecastFragment extends Fragment {
             }
         };
 
-        onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                switch (key) {
-                    case Constants.SHARED_PREFERENCES_CURRENT_CITY_ID:
-                        cityId = sharedPreferences.getInt(key, SearchSuggestionsProvider.CURRENT_LOCATION_SUGGESTION_ID);
-                        onNewCitySelected();
-                        break;
-                }
+        onSharedPreferenceChangeListener = (sharedPreferences, key) -> {
+            switch (key) {
+                case Constants.SHARED_PREFERENCES_CURRENT_CITY_ID:
+                    cityId = sharedPreferences.getInt(key, SearchSuggestionsProvider.CURRENT_LOCATION_SUGGESTION_ID);
+                    onNewCitySelected();
+                    break;
             }
         };
 

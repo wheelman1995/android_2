@@ -2,7 +2,6 @@ package ru.wheelman.weather;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.RadioButton;
 
 import androidx.annotation.NonNull;
@@ -30,12 +29,9 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         viewHolder.rb.setText(dataSet[i]);
-        viewHolder.rb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    callback.onListItemCheckedChanged(viewHolder.getLayoutPosition());
-                }
+        viewHolder.rb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                callback.onListItemCheckedChanged(viewHolder.getLayoutPosition());
             }
         });
     }

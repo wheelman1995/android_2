@@ -80,5 +80,5 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     // https://mvnrepository.com/artifact/androidx.viewpager/viewpager
     implementation group: 'androidx.viewpager', name: 'viewpager', version: '1.0.0'
-    implementation 'com.google.android.gms:play-services-location:16.0.0';
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 }

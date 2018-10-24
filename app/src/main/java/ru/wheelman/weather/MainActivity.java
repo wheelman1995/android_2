@@ -142,17 +142,14 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             return true;
         });
 
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if (!settingsFragment.isVisible()) {
-                    navigationView.getMenu().findItem(R.id.nav_drawer_settings).setChecked(false);
-                    homeReturnsUp = false;
-                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-                } else {
-                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
-                    homeReturnsUp = true;
-                }
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (!settingsFragment.isVisible()) {
+                navigationView.getMenu().findItem(R.id.nav_drawer_settings).setChecked(false);
+                homeReturnsUp = false;
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+            } else {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+                homeReturnsUp = true;
             }
         });
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -237,16 +234,13 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
     private void showAboutDialog() {
         aboutFragment = AboutFragment.newInstance();
-        aboutFragment.setListener(new AboutFragment.Listener() {
-            @Override
-            public void onDismiss() {
-                if (aboutFragment != null) {
-                    getSupportFragmentManager().beginTransaction()
-                            .remove(aboutFragment)
-                            .commit();
-                }
-                navigationView.getMenu().findItem(R.id.nav_drawer_about).setChecked(false);
+        aboutFragment.setListener(() -> {
+            if (aboutFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .remove(aboutFragment)
+                        .commit();
             }
+            navigationView.getMenu().findItem(R.id.nav_drawer_about).setChecked(false);
         });
         aboutFragment.show(getSupportFragmentManager(), "AboutFragment");
     }
@@ -310,14 +304,11 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             }
         });
 
-        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    search.collapseActionView();
+        searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                search.collapseActionView();
 //                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 //                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-                }
             }
         });
     }
@@ -374,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
     @Override
     protected void onDestroy() {
+        Database.destroyInstance();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }

@@ -45,7 +45,9 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        new DownloadImageTask(holder.icon).execute(iconURLs.get(position));
+        DownloadImageTask downloadImageTask = new DownloadImageTask();
+        downloadImageTask.setListener((bitmap -> holder.icon.setImageBitmap(bitmap)));
+        downloadImageTask.execute(iconURLs.get(position));
 
         holder.date.setText(dates.get(position));
         holder.weatherConditionDescription.setText(weatherConditionDescriptions.get(position));
@@ -75,40 +77,46 @@ public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRe
             icon = view.findViewById(R.id.iv_forecasted_weather_icon);
         }
     }
+}
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        private ImageView imageView;
+class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
-        public DownloadImageTask(ImageView imageView) {
-            this.imageView = imageView;
-        }
+    private Listener listener;
 
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            String url = strings[0];
-            Bitmap bmp = null;
-            InputStream in = null;
-            try {
-                in = new URL(url).openStream();
-                bmp = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+    void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    protected Bitmap doInBackground(String... strings) {
+        String url = strings[0];
+        Bitmap bmp = null;
+        InputStream in = null;
+        try {
+            in = new URL(url).openStream();
+            bmp = BitmapFactory.decodeStream(in);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-            return bmp;
         }
+        return bmp;
+    }
 
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            imageView.setImageBitmap(bitmap);
-        }
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        if (listener != null)
+            listener.onDownloadImageTaskCompleted(bitmap);
+    }
+
+    interface Listener {
+        void onDownloadImageTaskCompleted(Bitmap bitmap);
     }
 }

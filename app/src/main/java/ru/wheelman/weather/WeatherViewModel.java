@@ -28,4 +28,10 @@ public class WeatherViewModel extends AndroidViewModel {
     private void createDb() {
         db = Database.getDatabase(getApplication());
     }
+
+    @Override
+    protected void onCleared() {
+        Database.destroyInstance();
+        super.onCleared();
+    }
 }

@@ -5,17 +5,16 @@
     android:id="@+id/nav_drawer_header"
     android:layout_width="match_parent"
     android:layout_height="192dp"
-    android:background="@android:color/darker_gray"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_nav_drawer_header_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:src="@drawable/day" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_nav_drawer_header_foreground"
         android:layout_width="50dp"
         android:layout_height="50dp"

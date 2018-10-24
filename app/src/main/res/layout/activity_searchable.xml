@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/pb_cities"
@@ -15,14 +16,14 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:drawSelectorOnTop="true"
         android:divider="@android:drawable/divider_horizontal_textfield"
         android:dividerHeight="1dp"
+        android:drawSelectorOnTop="true"
         android:footerDividersEnabled="true">
 
     </ListView>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,4 +32,4 @@
         android:textColor="#0000ff"
         android:textSize="24sp" />
 
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

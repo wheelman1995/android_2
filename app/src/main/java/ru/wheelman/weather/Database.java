@@ -19,7 +19,7 @@ public abstract class Database extends RoomDatabase {
             database.beginTransaction();
 
             database.execSQL("alter table WeatherData rename to WeatherDataOld;");
-            database.execSQL("create table WeatherData (id INTEGER primary key unique not null, temperature TEXT, dt INTEGER NOT NULL, city TEXT, country TEXT);");
+            database.execSQL("create table WeatherData (id INTEGER primary key unique not null, temperature TEXT, dt INTEGER, city TEXT, country TEXT);");
             database.execSQL("insert into WeatherData (id, temperature, dt, city, country) select id, temperature, dt, city, country from WeatherDataOld;");
             database.execSQL("drop table WeatherDataOld;");
 
@@ -32,9 +32,9 @@ public abstract class Database extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
 
-            database.execSQL("alter table WeatherData add column sunset integer not null;");
-            database.execSQL("alter table WeatherData add column sunrise integer not null;");
-            database.execSQL("create index id_index on WeatherData (id);");
+            database.execSQL("alter table WeatherData add column sunset integer;");
+            database.execSQL("alter table WeatherData add column sunrise integer;");
+            database.execSQL("create index WeatherData_id_index on WeatherData (id);");
 
         }
     };
@@ -54,7 +54,7 @@ public abstract class Database extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("create table ForecastedWeatherData (id integer primary key not null, json_data text);");
-            database.execSQL("create index id_index on ForecastedWeatherData (id);");
+            database.execSQL("create index ForecastedWeatherData_id_index on ForecastedWeatherData (id);");
 
         }
     };

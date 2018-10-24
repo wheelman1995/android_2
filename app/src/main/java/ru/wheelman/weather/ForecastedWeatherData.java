@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(indices = @Index(value = {"id"}, name = "id_index"))
+@Entity(indices = @Index(value = {"id"}, name = "ForecastedWeatherData_id_index"))
 public class ForecastedWeatherData {
 
     @PrimaryKey

@@ -12,19 +12,19 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_fragment_main_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="matrix" />
 
-        <FrameLayout
+        <androidx.appcompat.widget.ContentFrameLayout
             android:id="@+id/fl_ambient"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
 
-        </FrameLayout>
+        </androidx.appcompat.widget.ContentFrameLayout>
 
         <!--<FrameLayout-->
         <!--android:id="@+id/fl_main_with_ambient"-->
@@ -44,7 +44,7 @@
         <!--android:text="@string/current_weather"-->
         <!--android:textStyle="bold" />-->
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_data_receiving_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/fl_ambient" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_data_receiving_time_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
         <!--android:text="@string/temperature"-->
         <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_current_temperature_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
         <!--app:layout_constraintEnd_toEndOf="parent"-->
         <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_weather_icon"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -107,7 +107,7 @@
             app:layout_constraintTop_toTopOf="@id/tv_current_temperature_value" />
 
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_weather_condition_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

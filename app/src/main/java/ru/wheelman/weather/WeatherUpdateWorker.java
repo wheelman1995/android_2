@@ -329,6 +329,12 @@ public class WeatherUpdateWorker extends Worker {
         return loadForecast();
     }
 
+    @Override
+    public void onStopped(boolean cancelled) {
+        Database.destroyInstance();
+        super.onStopped(cancelled);
+    }
+
     enum DescriptionsIcons {
         SNOW("Snow", new String[]{"13d", "13n"}), THUNDERSTORM("Thunderstorm", new String[]{"11d", "11n"}),
         RAIN("Rain", new String[]{"10d", "10n", "13d", "13n", "09d", "09n"}), DRIZZLE("Drizzle", new String[]{"09d", "09n"}),

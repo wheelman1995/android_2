@@ -41,12 +41,9 @@ public class AboutFragment extends AppCompatDialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         AlertDialog alertDialog = builder
-                .setPositiveButton(R.string.about_positive, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (listener != null) {
-                            listener.onDismiss();
-                        }
+                .setPositiveButton(R.string.about_positive, (dialog, which) -> {
+                    if (listener != null) {
+                        listener.onDismiss();
                     }
                 })
                 .setTitle(R.string.about_title)
