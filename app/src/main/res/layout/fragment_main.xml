@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/srl_fragment_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <ImageView
+            android:id="@+id/iv_fragment_main_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="matrix" />
+
+        <FrameLayout
+            android:id="@+id/fl_ambient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+        </FrameLayout>
+
+        <!--<FrameLayout-->
+        <!--android:id="@+id/fl_main_with_ambient"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0dp"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@id/fl_ambient"/>-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/tv_current_weather"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingStart="20dp"-->
+        <!--android:paddingTop="20dp"-->
+        <!--android:paddingEnd="20dp"-->
+        <!--android:text="@string/current_weather"-->
+        <!--android:textStyle="bold" />-->
+
+        <TextView
+            android:id="@+id/tv_data_receiving_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:shadowRadius="10"
+            android:text="@string/data_receiving_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fl_ambient" />
+
+        <TextView
+            android:id="@+id/tv_data_receiving_time_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:shadowRadius="10"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/tv_data_receiving_time"
+            app:layout_constraintTop_toTopOf="@id/tv_data_receiving_time" />
+
+        <!--<TextView-->
+        <!--android:id="@+id/tv_current_temperature"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingStart="20dp"-->
+        <!--android:paddingTop="20dp"-->
+        <!--android:paddingEnd="20dp"-->
+        <!--android:text="@string/temperature"-->
+        <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
+
+        <TextView
+            android:id="@+id/tv_current_temperature_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:shadowRadius="10"
+            android:textSize="48sp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time" />
+        <!--<ImageView-->
+        <!--android:src="@drawable/weather_icon_background"-->
+        <!--android:id="@+id/iv_weather_icon_background"-->
+        <!--android:layout_width="55dp"-->
+        <!--android:layout_height="55dp"-->
+        <!--android:layout_marginTop="20dp"-->
+        <!--android:layout_marginEnd="50dp"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
+
+        <ImageView
+            android:id="@+id/iv_weather_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="@id/tv_weather_condition_description"
+            app:layout_constraintStart_toStartOf="@id/tv_weather_condition_description"
+            app:layout_constraintTop_toTopOf="@id/tv_current_temperature_value" />
+
+
+        <TextView
+            android:id="@+id/tv_weather_condition_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:gravity="center"
+            android:shadowRadius="10"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:translationY="-10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_weather_icon" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
