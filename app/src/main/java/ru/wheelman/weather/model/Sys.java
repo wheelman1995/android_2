@@ -20,9 +20,8 @@ public class Sys implements Parcelable {
     @SerializedName("country")
     private String country;
 
-    protected Sys(Parcel in) {
-        country = in.readString();
-    }
+    @SerializedName("sunrise")
+    private long sunrise;
 
     public String getCountry() {
         return country;
@@ -37,8 +36,35 @@ public class Sys implements Parcelable {
         return 0;
     }
 
+    @SerializedName("sunset")
+    private long sunset;
+
+    protected Sys(Parcel in) {
+        country = in.readString();
+        sunset = in.readLong();
+        sunrise = in.readLong();
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(country);
+        dest.writeLong(sunset);
+        dest.writeLong(sunrise);
+    }
+
+    public long getSunrise() {
+        return sunrise;
+    }
+
+    public void setSunrise(long sunrise) {
+        this.sunrise = sunrise;
+    }
+
+    public long getSunset() {
+        return sunset;
+    }
+
+    public void setSunset(long sunset) {
+        this.sunset = sunset;
     }
 }

@@ -9,8 +9,6 @@ import androidx.lifecycle.LiveData;
 
 public class WeatherViewModel extends AndroidViewModel {
 
-    private LiveData<WeatherData> weatherData;
-
     private Database db;
 
     public WeatherViewModel(@NonNull Application application) {
@@ -19,12 +17,15 @@ public class WeatherViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<WeatherData> getWeatherData(int cityId) {
-        weatherData = db.weatherDataDAO().getDataByCityId(cityId);
-        return weatherData;
+    LiveData<WeatherData> getWeatherData(int cityId) {
+        return db.weatherDataDAO().getDataByCityId(cityId);
     }
 
-    public void createDb() {
+    LiveData<ForecastedWeatherData> getForecastWeatherData(int cityId) {
+        return db.forecastedWeatherDataDAO().getForecastedDataByCityId(cityId);
+    }
+
+    private void createDb() {
         db = Database.getDatabase(getApplication());
     }
 }

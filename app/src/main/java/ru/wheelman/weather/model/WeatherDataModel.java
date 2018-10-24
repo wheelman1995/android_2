@@ -28,14 +28,30 @@ public class WeatherDataModel implements Parcelable {
     private int id;
     @SerializedName("main")
     private Main main;
+    @SerializedName("weather")
+    private Weather[] weather;
+
+    protected WeatherDataModel(Parcel in) {
+        dt = in.readLong();
+        id = in.readInt();
+        main = in.readParcelable(ClassLoader.getSystemClassLoader());
+        name = in.readString();
+        sys = in.readParcelable(ClassLoader.getSystemClassLoader());
+        weather = (Weather[]) in.readParcelableArray(ClassLoader.getSystemClassLoader());
+    }
 
     public WeatherDataModel() {
     }
 
-    protected WeatherDataModel(Parcel in) {
-        dt = in.readLong();
-        main = in.readParcelable(ClassLoader.getSystemClassLoader());
+    public Weather[] getWeather() {
+        return weather;
     }
+
+    public void setWeather(Weather[] weather) {
+        this.weather = weather;
+    }
+
+
 
     public int getId() {
         return id;
@@ -85,6 +101,11 @@ public class WeatherDataModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(dt);
+        dest.writeInt(id);
         dest.writeParcelable(main, flags);
+        dest.writeString(name);
+        dest.writeParcelable(sys, flags);
+        dest.writeParcelableArray(weather, flags);
+
     }
 }

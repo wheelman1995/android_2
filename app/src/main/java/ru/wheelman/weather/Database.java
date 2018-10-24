@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@androidx.room.Database(entities = {WeatherData.class}, version = 2, exportSchema = false)
+@androidx.room.Database(entities = {WeatherData.class, ForecastedWeatherData.class}, version = 5, exportSchema = false)
 public abstract class Database extends RoomDatabase {
     private static Database INSTANCE;
     public static final String DATABASE_NAME = "weather-data";
@@ -28,10 +28,41 @@ public abstract class Database extends RoomDatabase {
         }
     };
 
+    private static final Migration migration_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+
+            database.execSQL("alter table WeatherData add column sunset integer not null;");
+            database.execSQL("alter table WeatherData add column sunrise integer not null;");
+            database.execSQL("create index id_index on WeatherData (id);");
+
+        }
+    };
+
+    private static final Migration migration_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("alter table WeatherData add column weather_id text;");
+            database.execSQL("alter table WeatherData add column weather_main text;");
+            database.execSQL("alter table WeatherData add column weather_description text;");
+            database.execSQL("alter table WeatherData add column weather_icon text;");
+
+        }
+    };
+
+    private static final Migration migration_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("create table ForecastedWeatherData (id integer primary key not null, json_data text);");
+            database.execSQL("create index id_index on ForecastedWeatherData (id);");
+
+        }
+    };
+
     public static Database getDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(), Database.class, DATABASE_NAME)
-                    .addMigrations(migration_1_2)
+                    .addMigrations(migration_1_2, migration_2_3, migration_3_4, migration_4_5)
                     .build();
         }
         return INSTANCE;
@@ -43,4 +74,6 @@ public abstract class Database extends RoomDatabase {
     }
 
     public abstract WeatherDataDAO weatherDataDAO();
+
+    public abstract ForecastedWeatherDataDAO forecastedWeatherDataDAO();
 }

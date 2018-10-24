@@ -22,6 +22,72 @@ public class WeatherData {
     @ColumnInfo(name = "country")
     private String country;
 
+    @ColumnInfo(name = "sunset")
+    private long sunset;
+
+    @ColumnInfo(name = "sunrise")
+    private long sunrise;
+
+    @ColumnInfo(name = "weather_id")
+    private String weatherId;
+
+    @ColumnInfo(name = "weather_main")
+    private String weatherMain;
+
+    @ColumnInfo(name = "weather_description")
+    private String weatherDescription;
+
+    @ColumnInfo(name = "weather_icon")
+    private String weatherIcon;
+
+    public String getWeatherId() {
+        return weatherId;
+    }
+
+    public void setWeatherId(String weatherId) {
+        this.weatherId = weatherId;
+    }
+
+    public String getWeatherMain() {
+        return weatherMain;
+    }
+
+    public void setWeatherMain(String weatherMain) {
+        this.weatherMain = weatherMain;
+    }
+
+    public String getWeatherDescription() {
+        return weatherDescription;
+    }
+
+    public void setWeatherDescription(String weatherDescription) {
+        this.weatherDescription = weatherDescription;
+    }
+
+    public String getWeatherIcon() {
+        return weatherIcon;
+    }
+
+    public void setWeatherIcon(String weatherIcon) {
+        this.weatherIcon = weatherIcon;
+    }
+
+    public long getSunset() {
+        return sunset;
+    }
+
+    public void setSunset(long sunset) {
+        this.sunset = sunset;
+    }
+
+    public long getSunrise() {
+        return sunrise;
+    }
+
+    public void setSunrise(long sunrise) {
+        this.sunrise = sunrise;
+    }
+
     public String getCountry() {
         return country;
     }

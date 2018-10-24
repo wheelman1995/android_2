@@ -71,12 +71,7 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerViewAd
         tempSettingRV.setAdapter(adapter);
         tempSettingRV.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
 
-//        String[] units = getResources().getStringArray(R.array.temp_setting_values);
-//        for (int i = 0; i < units.length; i++) {
-//            if (units[i].equals())
-//        }
         unitIndex = ((MainActivity) getActivity()).getTemperatureUnits().getUnitIndex();
-
 
         return view;
     }

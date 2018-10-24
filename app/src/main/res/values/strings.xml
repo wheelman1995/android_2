@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Weather</string>
     <string name="search">search</string>
-    <string name="search_city">Search a city</string>
+    <string name="search_city">Search for a city</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="send_feedback">Send feedback</string>
@@ -14,7 +14,7 @@
     <string name="no_data_available">No data available!</string>
     <string name="temp_units_setting_question">What weather temperature units do you prefer?</string>
     <string name="current_weather">Current weather</string>
-    <string name="data_receiving_time">as of:</string>
+    <string name="data_receiving_time">As of:</string>
     <string name="temperature">Temperature</string>
     <string name="searching_for_cities">Searching for cities…</string>
     <string name="empty_list_view">@string/searching_for_cities</string>
@@ -23,6 +23,16 @@
     <string name="about_positive">Assimilated</string>
     <string name="about_title">About</string>
     <string name="about_message">Created by wheelman1995\nVersion: %s</string>
+    <string name="voice_prompt">speak in english</string>
+    <string name="tab_today_title">today</string>
+    <string name="tab_five_days">5 days</string>
+    <string name="location_permission_denied_warning">You will not be able to automatically receive weather for your location until you manually grant the location permission!</string>
+    <string name="location_permission_rationale">Please, grant this permission if you want to automatically receive weather for your location.</string>
+    <string name="location_permission_rationale_positive_button">Close</string>
+    <string name="location_permission_warning_positive_button">@string/location_permission_rationale_positive_button</string>
+    <string name="rationale_title">Attention!</string>
+    <string name="permission_denied_warning_title">Warning!</string>
+    <string name="degree_symbol">\u00b0</string>
 
     <string-array name="temp_setting_values">
         <item>Celsius</item>

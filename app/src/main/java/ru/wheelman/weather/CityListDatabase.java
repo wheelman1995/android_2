@@ -20,7 +20,6 @@ public class CityListDatabase {
 
     private CityListDatabase() {
         matchedCities = new ArrayList<>();
-//        databaseTask = new DatabaseTask();
     }
 
     public static ArrayList<City> getMatchedCities() {
@@ -34,11 +33,6 @@ public class CityListDatabase {
     public static CityListDatabase getInstance() {
         return ourInstance;
     }
-
-//    private void stopOngoingTask() {
-//        if (databaseTask.getStatus() == AsyncTask.Status.RUNNING)
-//            databaseTask.cancel(true);
-//    }
 
     private static void initialize() {
         Gson gson = new Gson();
@@ -54,7 +48,7 @@ public class CityListDatabase {
     }
 
     public void findCitiesBeginningWith(JobProgressListener jobProgressListener, String query) {
-//        stopOngoingTask();
+
         DatabaseTask databaseTask = new DatabaseTask();
         databaseTask.setJobProgressListener(jobProgressListener);
         databaseTask.execute(FIND_CITIES_BEGINNING_WITH, query);

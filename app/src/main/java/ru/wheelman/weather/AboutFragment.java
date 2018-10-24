@@ -1,4 +1,4 @@
-package ru.wheelman.weather.model;
+package ru.wheelman.weather;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
-import ru.wheelman.weather.R;
 
 public class AboutFragment extends AppCompatDialogFragment {
 

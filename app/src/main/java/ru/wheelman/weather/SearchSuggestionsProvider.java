@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -18,7 +17,15 @@ import androidx.annotation.Nullable;
 public class SearchSuggestionsProvider extends ContentProvider {
 
     private static final String TAG = SearchSuggestionsProvider.class.getSimpleName();
+    public static final int CURRENT_LOCATION_SUGGESTION_ID = 1;
+    //    public static final String CURRENT_LOCATION_SUGGESTION_INTENT_DATA = "current_location_suggestion_id";
+    public static final String CURRENT_LOCATION_SUGGESTION_COLUMN_TEXT_1 = "Use your location";
 
+    private static boolean currentLocationSuggestionEnabled = true;
+
+    public static void setCurrentLocationSuggestionEnabled(boolean currentLocationSuggestionEnabled) {
+        SearchSuggestionsProvider.currentLocationSuggestionEnabled = currentLocationSuggestionEnabled;
+    }
 
     @Override
     public boolean onCreate() {
@@ -63,14 +70,19 @@ public class SearchSuggestionsProvider extends ContentProvider {
 //SUGGEST_COLUMN_TEXT_2
 //A string. If your Cursor includes this column, then all suggestions are provided in a two-line format. The string in this column is displayed as a second, smaller line of text below the primary suggestion text. It can be null or empty to indicate no secondary text.
         String query = uri.getLastPathSegment().toLowerCase(); // user's input
-        Log.d(TAG, uri.toString());
-        Log.d(TAG, query);
-        MatrixCursor matrixCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA});
+//        Log.d(TAG, uri.toString());
+//        Log.d(TAG, query);
+        MatrixCursor matrixCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA, SearchManager.SUGGEST_COLUMN_ICON_1});
+
+        if (currentLocationSuggestionEnabled) {
+            matrixCursor.addRow(new String[]{String.valueOf(CURRENT_LOCATION_SUGGESTION_ID), CURRENT_LOCATION_SUGGESTION_COLUMN_TEXT_1, String.valueOf(CURRENT_LOCATION_SUGGESTION_ID), String.valueOf(R.drawable.current_location_suggestion_icon)});
+        }
+
         ArrayList<City> cities = CityListDatabase.getInstance().findCitiesBeginningWith(query);
         for (int i = 0; i < cities.size(); i++) {
             City currentCity = cities.get(i);
             String id = String.valueOf(currentCity.getId());
-            matrixCursor.addRow(new String[]{id, String.format(Locale.UK, "%s, %s", currentCity.getName(), currentCity.getCountry()), id});
+            matrixCursor.addRow(new String[]{id, String.format(Locale.UK, "%s, %s", currentCity.getName(), currentCity.getCountry()), id, String.valueOf(R.drawable.blank)});
         }
 
         return matrixCursor;

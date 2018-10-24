@@ -12,17 +12,15 @@
         android:id="@+id/image_nav_drawer_header_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:src="@drawable/day" />
 
     <ImageView
         android:id="@+id/image_nav_drawer_header_foreground"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:elevation="8dp"
         android:src="@drawable/sun"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_editor_absoluteX="256dp"
+        app:layout_editor_absoluteY="60dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
