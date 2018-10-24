@@ -207,14 +207,18 @@ public class WeatherUpdateWorker extends Worker {
             }
         }
 
-        ArrayList<OneDay> days = new ArrayList<>();
-        int indexOfDay = 0;
 
         ThreeHourData[] threeHourData = data.getThreeHourData();
 
-        long srise = sunrise + 86400L; //current day ends with the next sunset (24 hours in seconds = 86400)
+        long srise = sunrise + 86400L; //current day ends with the next sunrise (24 hours in seconds = 86400)
 
-        days.add(new OneDay());
+        ArrayList<OneDay> days = new ArrayList<>();
+        int indexOfDay = -1;
+        //if the first data is for tomorrow (tomorrow begins, after the sunrise), do not add the first day here, it will be added below
+        if (threeHourData[0].getDt() <= srise) {
+            days.add(new OneDay());
+            indexOfDay++;
+        }
 
         for (int i = 0; i < threeHourData.length; i++) {
             //split data into days

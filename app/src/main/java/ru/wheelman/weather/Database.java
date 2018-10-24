@@ -69,8 +69,10 @@ public abstract class Database extends RoomDatabase {
     }
 
     public static void destroyInstance() {
-        INSTANCE.close();
-        INSTANCE = null;
+        if (INSTANCE != null) {
+            INSTANCE.close();
+            INSTANCE = null;
+        }
     }
 
     public abstract WeatherDataDAO weatherDataDAO();
