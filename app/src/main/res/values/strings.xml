@@ -33,6 +33,9 @@
     <string name="rationale_title">Attention!</string>
     <string name="permission_denied_warning_title">Warning!</string>
     <string name="degree_symbol">\u00b0</string>
+    <string name="feedback_hint_subject">Subject</string>
+    <string name="feedback_hint_message_body">Message body</string>
+    <string name="feedback_button_send_text">Send</string>
 
     <string-array name="temp_setting_values">
         <item>Celsius</item>

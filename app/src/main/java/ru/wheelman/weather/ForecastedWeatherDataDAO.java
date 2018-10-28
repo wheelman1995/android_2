@@ -9,7 +9,7 @@ import androidx.room.Update;
 
 @Dao
 public interface ForecastedWeatherDataDAO {
-    @Query("SELECT * FROM ForecastedWeatherData WHERE id = :id")
+    @Query("SELECT * FROM ForecastedWeatherData WHERE _id = :id")
     LiveData<ForecastedWeatherData> getForecastedDataByCityId(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -1,14 +1,16 @@
 package ru.wheelman.weather;
 
+import android.provider.BaseColumns;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(indices = @Index(value = {"id"}, name = "WeatherData_id_index"))
+@Entity()
 public class WeatherData {
 
     @PrimaryKey
+    @ColumnInfo(name = BaseColumns._ID)
     private int id;
 
     @ColumnInfo(name = "temperature")

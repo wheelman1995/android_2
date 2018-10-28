@@ -107,6 +107,8 @@ public class MainFragment extends Fragment {
 
     private void initVariables(View view) {
         SharedPreferences sp = getActivity().getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        latitude = Double.parseDouble(sp.getString(Constants.SHARED_PREFERENCES_LATITUDE_KEY, "-91"));
+        longitude = Double.parseDouble(sp.getString(Constants.SHARED_PREFERENCES_LONGITUDE_KEY, "-181"));
         //default value = current location
         cityId = sp.getInt(Constants.SHARED_PREFERENCES_CURRENT_CITY_ID, SearchSuggestionsProvider.CURRENT_LOCATION_SUGGESTION_ID);
         unitIndex = sp.getInt(Constants.SHARED_PREFERENCES_TEMPERATURE_UNIT_KEY, Units.CELSIUS.getUnitIndex());
@@ -285,11 +287,33 @@ public class MainFragment extends Fragment {
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult != null) {
                     Location location = locationResult.getLastLocation();
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+
+                    float[] results = new float[1];
+
+
+                    if (-90d <= latitude && latitude <= 90d && -180d <= longitude && longitude <= 180d) {
+                        Location.distanceBetween(latitude, longitude, lat, lon, results);
+                        if (results[0] > 5000) {
+                            saveNewLatLonAndRecreateWork(lat, lon);
+                        } else {
+                            subscribeForDataUpdates();
+                        }
+                    } else {
+                        saveNewLatLonAndRecreateWork(lat, lon);
+                    }
 //                    Log.d(TAG, String.valueOf(latitude) + " " + longitude + " onLocationResult");
-                    createPeriodicWork(cityId, unitIndex, latitude, longitude, true);
                 }
+            }
+
+            private void saveNewLatLonAndRecreateWork(double lat, double lon) {
+                latitude = lat;
+                longitude = lon;
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.MAIN_SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+                sp.edit().putString(Constants.SHARED_PREFERENCES_LATITUDE_KEY, Double.toString(latitude)).apply();
+                sp.edit().putString(Constants.SHARED_PREFERENCES_LONGITUDE_KEY, Double.toString(longitude)).apply();
+                createPeriodicWork(cityId, unitIndex, latitude, longitude, true);
             }
         };
         swipeRefreshLayout.setOnRefreshListener(this::refreshManually);

@@ -6,6 +6,7 @@
     android:searchSuggestIntentAction="android.intent.action.VIEW"
     android:voiceLanguage="eng"
     android:voicePromptText="@string/voice_prompt"
+    android:searchSuggestSelection="suggest_text_1 LIKE ?"
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer">
 
 </searchable>

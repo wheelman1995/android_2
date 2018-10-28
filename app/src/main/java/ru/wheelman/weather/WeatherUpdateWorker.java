@@ -103,7 +103,7 @@ public class WeatherUpdateWorker extends Worker {
     }
 
     private Result loadForecastByCoordinates() {
-        Call<ForecastDataModel> call = openWeather.loadForecastedWeatherDataByCoordinates(latitude, longitude, queryUnit, Constants.API_KEY);
+        Call<ForecastDataModel> call = openWeather.loadForecastedWeatherDataByCoordinates(latitude, longitude, queryUnit, API_KEY.API_KEY);
 
         Response<ForecastDataModel> response = null;
         try {
@@ -133,7 +133,7 @@ public class WeatherUpdateWorker extends Worker {
     }
 
     private Result loadForecast() {
-        Call<ForecastDataModel> call = openWeather.loadForecastedWeatherData(cityId, queryUnit, Constants.API_KEY);
+        Call<ForecastDataModel> call = openWeather.loadForecastedWeatherData(cityId, queryUnit, API_KEY.API_KEY);
 
         Response<ForecastDataModel> response = null;
         try {
@@ -264,7 +264,7 @@ public class WeatherUpdateWorker extends Worker {
         latitude = getInputData().getDouble(Constants.WORK_MANAGER_DATA_LATITUDE, -1);
         longitude = getInputData().getDouble(Constants.WORK_MANAGER_DATA_LONGITUDE, -1);
 
-        Call<WeatherDataModel> call = openWeather.loadWeatherDataByCoordinates(latitude, longitude, queryUnit, Constants.API_KEY);
+        Call<WeatherDataModel> call = openWeather.loadWeatherDataByCoordinates(latitude, longitude, queryUnit, API_KEY.API_KEY);
 
         Response<WeatherDataModel> response = null;
         try {
@@ -299,7 +299,7 @@ public class WeatherUpdateWorker extends Worker {
     }
 
     private Result loadCurrentWeather() {
-        Call<WeatherDataModel> call = openWeather.loadWeatherData(cityId, queryUnit, Constants.API_KEY);
+        Call<WeatherDataModel> call = openWeather.loadWeatherData(cityId, queryUnit, API_KEY.API_KEY);
 
         Response<WeatherDataModel> response = null;
         try {

@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/search_adapter_item"
+        android:id="@+id/tv_search_adapter_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     private TabLayout.Tab tabItemFiveDays;
     private TabLayout tabLayout;
     private MainFragment mainFragment;
+    private static SQLiteDatabase cityListDB;
+    private FeedbackFragment feedbackFragment;
 
     public MainFragment getMainFragment() {
         return mainFragment;
@@ -78,6 +81,10 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         }
     }
 
+    public static SQLiteDatabase getCityListDB() {
+        return cityListDB;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,13 +97,14 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         initCityListDatabase();
 
         initActionBar();
+
+
     }
 
     private void initCityListDatabase() {
-        CityListDatabase.init(getApplication());
+        cityListDB = new CityListDB(this).getReadableDatabase();
+//        CityListDatabase.init(getApplication());
     }
-
-
 
     private void initActionBar() {
         Toolbar toolbar = findViewById(R.id.my_toolbar);
@@ -133,6 +141,9 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                 case R.id.nav_drawer_about:
                     showAboutDialog();
                     break;
+                case R.id.nav_drawer_feedback:
+                    showFeedbackFragment();
+                    break;
             }
 
             if (item.getItemId() != R.id.nav_drawer_weather) {
@@ -143,14 +154,27 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         });
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            if (!settingsFragment.isVisible()) {
-                navigationView.getMenu().findItem(R.id.nav_drawer_settings).setChecked(false);
-                homeReturnsUp = false;
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-            } else {
+
+            if (feedbackFragment != null && feedbackFragment.isVisible() || settingsFragment != null && settingsFragment.isVisible()) {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
                 homeReturnsUp = true;
+                return;
             }
+
+            if (settingsFragment != null) {
+                if (!settingsFragment.isVisible()) {
+                    navigationView.getMenu().findItem(R.id.nav_drawer_settings).setChecked(false);
+                }
+            }
+
+            if (feedbackFragment != null) {
+                if (!feedbackFragment.isVisible()) {
+                    navigationView.getMenu().findItem(R.id.nav_drawer_feedback).setChecked(false);
+                }
+            }
+
+                homeReturnsUp = false;
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
         });
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
 
@@ -229,6 +253,20 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 //                viewPager.setCurrentItem(ForecastFragment.ID_FOR_VIEW_PAGER, true);
 //            }
 //        });
+    }
+
+    private void showFeedbackFragment() {
+        if (feedbackFragment != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .remove(feedbackFragment)
+                    .commit();
+            getSupportFragmentManager().popBackStackImmediate("FeedbackFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+        feedbackFragment = FeedbackFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fl_main, feedbackFragment, null)
+                .addToBackStack("FeedbackFragment")
+                .commit();
     }
 
 
@@ -366,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     @Override
     protected void onDestroy() {
         Database.destroyInstance();
+        cityListDB.close();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }

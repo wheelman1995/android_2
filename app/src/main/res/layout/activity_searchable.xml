@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:progressDrawable="@android:drawable/progress_horizontal"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
         android:tooltipText="@string/searching_for_cities" />
 
     <ListView

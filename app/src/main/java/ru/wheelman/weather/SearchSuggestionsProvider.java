@@ -5,10 +5,11 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.MergeCursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ public class SearchSuggestionsProvider extends ContentProvider {
     public static final String CURRENT_LOCATION_SUGGESTION_COLUMN_TEXT_1 = "Use your location";
 
     private static boolean currentLocationSuggestionEnabled = true;
+    private String proj;
 
     public static void setCurrentLocationSuggestionEnabled(boolean currentLocationSuggestionEnabled) {
         SearchSuggestionsProvider.currentLocationSuggestionEnabled = currentLocationSuggestionEnabled;
@@ -29,7 +31,8 @@ public class SearchSuggestionsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-
+        proj = String.format(Locale.UK, "%s, %s || ', ' || ifnull(%s, 'N/A') as %s, %s as %s, '%s' as %s", CityListDB.COLUMN_ID, CityListDB.COLUMN_NAME, CityListDB.COLUMN_COUNTRY,
+                SearchManager.SUGGEST_COLUMN_TEXT_1, CityListDB.COLUMN_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA, String.valueOf(R.drawable.blank), SearchManager.SUGGEST_COLUMN_ICON_1);
         return true;
     }
 
@@ -69,23 +72,28 @@ public class SearchSuggestionsProvider extends ContentProvider {
 //
 //SUGGEST_COLUMN_TEXT_2
 //A string. If your Cursor includes this column, then all suggestions are provided in a two-line format. The string in this column is displayed as a second, smaller line of text below the primary suggestion text. It can be null or empty to indicate no secondary text.
-        String query = uri.getLastPathSegment().toLowerCase(); // user's input
+//        String query = uri.getLastPathSegment().toLowerCase(); // user's input
 //        Log.d(TAG, uri.toString());
 //        Log.d(TAG, query);
-        MatrixCursor matrixCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA, SearchManager.SUGGEST_COLUMN_ICON_1});
+        SQLiteDatabase db = MainActivity.getCityListDB();
+        String selectionArg = selectionArgs[0].concat("%");
+
+        Cursor cursor = db.query(CityListDB.TABLE_NAME, new String[]{proj}, selection, new String[]{selectionArg}, null, null, SearchManager.SUGGEST_COLUMN_TEXT_1);
 
         if (currentLocationSuggestionEnabled) {
+            MatrixCursor matrixCursor = new MatrixCursor(new String[]{BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_INTENT_DATA, SearchManager.SUGGEST_COLUMN_ICON_1});
             matrixCursor.addRow(new String[]{String.valueOf(CURRENT_LOCATION_SUGGESTION_ID), CURRENT_LOCATION_SUGGESTION_COLUMN_TEXT_1, String.valueOf(CURRENT_LOCATION_SUGGESTION_ID), String.valueOf(R.drawable.current_location_suggestion_icon)});
+            return new MergeCursor(new Cursor[]{matrixCursor, cursor});
         }
 
-        ArrayList<City> cities = CityListDatabase.getInstance().findCitiesBeginningWith(query);
-        for (int i = 0; i < cities.size(); i++) {
-            City currentCity = cities.get(i);
-            String id = String.valueOf(currentCity.getId());
-            matrixCursor.addRow(new String[]{id, String.format(Locale.UK, "%s, %s", currentCity.getName(), currentCity.getCountry()), id, String.valueOf(R.drawable.blank)});
-        }
+//        ArrayList<City> cities = CityListDatabase.getInstance().findCitiesBeginningWith(query);
+//        for (int i = 0; i < cities.size(); i++) {
+//            City currentCity = cities.get(i);
+//            String id = String.valueOf(currentCity.getId());
+//            matrixCursor.addRow(new String[]{id, String.format(Locale.UK, "%s, %s", currentCity.getName(), currentCity.getCountry()), id, String.valueOf(R.drawable.blank)});
+//        }
 
-        return matrixCursor;
+        return cursor;
     }
 
     @Nullable
