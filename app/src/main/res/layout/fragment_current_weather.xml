@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="state"
+            type="ru.wheelman.weather.presentation.view_model.CurrentWeatherViewModelImpl.ScreenState" />
+
+        <variable
+            name="viewModel"
+            type="ru.wheelman.weather.presentation.view_model.CurrentWeatherViewModel" />
+
+        <variable
+            name="fragment"
+            type="ru.wheelman.weather.presentation.view.fragments.CurrentWeatherFragment" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srl_fragment_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:onRefreshListener="@{() -> viewModel.onRefreshSwipeRefreshLayout()}"
+        app:refreshing="@{state.currentWeatherIsBeingUpdated}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_fragment_main_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="matrix"
+                app:imageURI="@{state.backgroundURI}" />
+
+            <androidx.appcompat.widget.ContentFrameLayout
+                android:id="@+id/fl_ambient"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent">
+
+
+            </androidx.appcompat.widget.ContentFrameLayout>
+
+            <!--<FrameLayout-->
+            <!--android:id="@+id/fl_main_with_ambient"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="0dp"-->
+            <!--app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--app:layout_constraintStart_toStartOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@id/fl_ambient"/>-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/tv_current_weather"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:paddingStart="20dp"-->
+            <!--android:paddingTop="20dp"-->
+            <!--android:paddingEnd="20dp"-->
+            <!--android:text="@string/current_weather"-->
+            <!--android:textStyle="bold" />-->
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_update_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@string/update_time"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fl_ambient" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_update_time_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@{state.updateTime}"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/tv_update_time"
+                app:layout_constraintTop_toTopOf="@id/tv_update_time" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_data_receiving_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@string/data_receiving_time"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                app:layout_constraintEnd_toStartOf="@id/tv_data_receiving_time_value"
+                app:layout_constraintTop_toBottomOf="@id/fl_ambient" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_data_receiving_time_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@{state.dataReceivingTime}"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_data_receiving_time" />
+
+            <!--<TextView-->
+            <!--android:id="@+id/tv_current_temperature"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:paddingStart="20dp"-->
+            <!--android:paddingTop="20dp"-->
+            <!--android:paddingEnd="20dp"-->
+            <!--android:text="@string/temperature"-->
+            <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_current_temperature_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@{state.temperature}"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                android:textSize="48sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time" />
+            <!--<ImageView-->
+            <!--android:src="@drawable/weather_icon_background"-->
+            <!--android:id="@+id/iv_weather_icon_background"-->
+            <!--android:layout_width="55dp"-->
+            <!--android:layout_height="55dp"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:layout_marginEnd="50dp"-->
+            <!--app:layout_constraintEnd_toEndOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@id/tv_data_receiving_time_value" />-->
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_weather_icon"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="centerCrop"
+                app:imageBitmap="@{state.weatherIcon}"
+                app:layout_constraintEnd_toEndOf="@id/tv_weather_condition_description"
+                app:layout_constraintStart_toStartOf="@id/tv_weather_condition_description"
+                app:layout_constraintTop_toTopOf="@id/tv_current_temperature_value" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_weather_condition_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:shadowColor="@{state.backgroundIsDark ? @android:color/black : @android:color/white}"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="10"
+                android:text="@{state.weatherConditionDescription}"
+                android:textAllCaps="false"
+                android:textColor="@{state.backgroundIsDark ? @android:color/white : @android:color/black}"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:translationY="-10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/iv_weather_icon" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</layout>

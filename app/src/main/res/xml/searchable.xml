@@ -4,9 +4,9 @@
     android:label="@string/app_name"
     android:searchSuggestAuthority="ru.wheelman.weather.provider.SearchSuggestions"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:searchSuggestSelection="suggest_text_1 LIKE ?"
     android:voiceLanguage="eng"
     android:voicePromptText="@string/voice_prompt"
-    android:searchSuggestSelection="suggest_text_1 LIKE ?"
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer">
 
 </searchable>

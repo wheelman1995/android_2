@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/srl_fragment_forecast"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_fragment_forecast"
+    <data>
+
+        <variable
+            name="state"
+            type="ru.wheelman.weather.presentation.view_model.ForecastedWeatherViewModelImpl.ScreenState" />
+
+        <variable
+            name="fragment"
+            type="ru.wheelman.weather.presentation.view.fragments.ForecastedWeatherFragment" />
+
+        <variable
+            name="viewModel"
+            type="ru.wheelman.weather.presentation.view_model.ForecastedWeatherViewModel" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srl_fragment_forecast"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:setOnRefreshListener="@{() -> viewModel.onRefreshSwipeRefreshLayout()}"
+        app:setRefreshing="@{state.forecastedWeatherIsBeingUpdated}">
 
-    </androidx.recyclerview.widget.RecyclerView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_fragment_forecast"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
 
-    <!--<TextView-->
-    <!--android:id="@android:id/empty"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:gravity="center"-->
-    <!--android:text="@string/empty_list_view"-->
-    <!--android:textColor="#ff0000"-->
-    <!--android:textSize="24sp" />-->
+        </androidx.recyclerview.widget.RecyclerView>
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</layout>
