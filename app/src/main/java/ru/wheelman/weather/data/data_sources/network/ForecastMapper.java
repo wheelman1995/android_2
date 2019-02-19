@@ -11,7 +11,7 @@ import ru.wheelman.weather.domain.entities.FiveDayForecast;
 import ru.wheelman.weather.domain.entities.Units;
 
 public class ForecastMapper {
-    private static final SimpleDateFormat sdf = new SimpleDateFormat(OpenWeatherAPI.XML_RESPONSE_DATE_FORMAT, Locale.UK);
+    private static final SimpleDateFormat SDF = new SimpleDateFormat(OpenWeatherAPI.XML_RESPONSE_DATE_FORMAT, Locale.UK);
 
     public FiveDayForecast map(ForecastedWeatherXML forecastedWeatherXML) {
 
@@ -43,25 +43,35 @@ public class ForecastMapper {
 
     private List<FiveDayForecast.OneDay> splitIntoDays(ForecastedWeatherXML forecastedWeatherXML) {
         try {
-            long sunrise = sdf.parse(forecastedWeatherXML.getSun().getRise()).getTime();
-            long sunset = sdf.parse(forecastedWeatherXML.getSun().getSet()).getTime();
+            long sunrise = SDF.parse(forecastedWeatherXML.getSun().getRise()).getTime();
+            long sunset = SDF.parse(forecastedWeatherXML.getSun().getSet()).getTime();
             long twentyFourHoursInMilliseconds = 86400000L;
             long nextSunrise = sunrise + twentyFourHoursInMilliseconds;
 
             List<FiveDayForecast.OneDay> days = initDays();
             int indexOfCurrentDay = 0;
 
-            for (int i = 0; i < forecastedWeatherXML.getForecast().size(); ) {
+            int i = 0;
+            while (true) {
                 ForecastedWeatherXML.Time dataPiece = forecastedWeatherXML.getForecast().get(i);
+                boolean lastPiece = i == forecastedWeatherXML.getForecast().size() - 1;
+                boolean firstPiece = i == 0;
 
-                long forecastTime = sdf.parse(dataPiece.getFrom()).getTime();
+
+                long forecastTime = SDF.parse(dataPiece.getFrom()).getTime();
 
                 if (forecastTime < nextSunrise) {
                     days.get(indexOfCurrentDay).getDataPieces().add(mapDataPiece(dataPiece));
-                    i++;
-                } else {
 
-                    if (i != 0) {
+                    if (lastPiece) {
+                        concludeDay(days.get(indexOfCurrentDay), sunrise, sunset);
+                        break;
+                    }
+
+                    i++;
+//                    continue;
+                } else {
+                    if (!firstPiece) {
                         concludeDay(days.get(indexOfCurrentDay), sunrise, sunset);
 
                         indexOfCurrentDay++;
@@ -76,6 +86,32 @@ public class ForecastMapper {
                     nextSunrise += twentyFourHoursInMilliseconds;
                 }
             }
+
+//            for (int i = 0; i < forecastedWeatherXML.getForecast().size(); ) {
+//                ForecastedWeatherXML.Time dataPiece = forecastedWeatherXML.getForecast().get(i);
+//
+//                long forecastTime = SDF.parse(dataPiece.getFrom()).getTime();
+//
+//                if (forecastTime < nextSunrise) {
+//                    days.get(indexOfCurrentDay).getDataPieces().add(mapDataPiece(dataPiece));
+//                    i++;
+//                } else {
+//
+//                    if (i != 0) {
+//                        concludeDay(days.get(indexOfCurrentDay), sunrise, sunset);
+//
+//                        indexOfCurrentDay++;
+//
+//                        if (indexOfCurrentDay == OpenWeatherAPI.FORECAST_LENGTH_IN_DAYS) {
+//                            break;
+//                        }
+//                    }
+//
+//                    sunrise += twentyFourHoursInMilliseconds;
+//                    sunset += twentyFourHoursInMilliseconds;
+//                    nextSunrise += twentyFourHoursInMilliseconds;
+//                }
+//            }
             return days;
         } catch (ParseException e) {
             e.printStackTrace();
@@ -107,7 +143,7 @@ public class ForecastMapper {
         try {
             return new FiveDayForecast.OneDay.DataPiece()
                     .setCloudiness(dataPiece.getClouds().getAll())
-                    .setForecastTime(sdf.parse(dataPiece.getFrom()).getTime())
+                    .setForecastTime(SDF.parse(dataPiece.getFrom()).getTime())
                     .setHumidity(dataPiece.getHumidity().getValue())
                     .setPressure(dataPiece.getPressure().getValue())
                     .setTemperature(dataPiece.getTemperature().getValue())

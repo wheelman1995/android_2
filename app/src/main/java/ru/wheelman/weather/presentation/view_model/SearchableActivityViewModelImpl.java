@@ -15,12 +15,14 @@ import androidx.databinding.Bindable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import ru.wheelman.weather.BR;
+import ru.wheelman.weather.R;
 import ru.wheelman.weather.data.data_sources.databases.sqlite.CityListDB;
-import ru.wheelman.weather.di.scopes.SearchableActivityScope;
+import ru.wheelman.weather.di.scopes.SearchableActivityViewModelScope;
 import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 import ru.wheelman.weather.presentation.utils.UpdateMethodSelector;
+import toothpick.Toothpick;
 
-@SearchableActivityScope
+@SearchableActivityViewModelScope
 public class SearchableActivityViewModelImpl implements SearchableActivityViewModel {
 
     public static final String COLUMN_RESULT = "result";
@@ -36,8 +38,9 @@ public class SearchableActivityViewModelImpl implements SearchableActivityViewMo
 
     private ScreenState screenState;
 
+    @Inject
     public SearchableActivityViewModelImpl() {
-        screenState = new ScreenState(false, false);
+        screenState = new ScreenState();
     }
 
     @Override
@@ -56,18 +59,24 @@ public class SearchableActivityViewModelImpl implements SearchableActivityViewMo
     public LiveData<Cursor> onActionSearchIntent(Intent intent) {
         String query = intent.getStringExtra(SearchManager.QUERY);
 
+        screenState.setSearchStatus(context.getString(R.string.searching_for_cities));
+        screenState.setSearchStatusTextColor(context.getResources().getColor(android.R.color.holo_blue_dark));
+
         DatabaseTask databaseTask = new DatabaseTask();
         MutableLiveData<Cursor> liveCursor = new MutableLiveData<>();
         databaseTask.setListener(cursor -> {
             screenState.setSearchFinished(true);
 //            progressBar.hide();
             if (cursor.getCount() == 0) {
-                screenState.setSearchResultEmpty(true);
-//                screenState.setEmptyText(context.getString(R.string.no_data_available));
+                screenState.setSearchStatus(context.getString(R.string.nothing_found));
+                screenState.setSearchStatusTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+//                screenState.setEmptyText(context.getString(R.string.nothing_found));
 //                screenState.setTextColor(getResources().getColor(R.color.red));
                 cursor.close();
                 return;
             }
+
+            screenState.setSearchStatus(null);
             liveCursor.setValue(cursor);
         });
         databaseTask.execute(query);
@@ -80,7 +89,7 @@ public class SearchableActivityViewModelImpl implements SearchableActivityViewMo
 //                progressBar.hide();
 //
 //                if (adapter.getCount() == 0) {
-//                    empty.setText(getString(R.string.no_data_available));
+//                    empty.setText(getString(R.string.nothing_found));
 //                    empty.setTextColor(getResources().getColor(R.color.red));
 //                }
 //            }
@@ -105,8 +114,11 @@ public class SearchableActivityViewModelImpl implements SearchableActivityViewMo
     }
 
     @Override
-    public void onDestroy() {
-
+    public void onDestroy(boolean finishing) {
+        if (finishing) {
+            Log.d(TAG, "onDestroy is finishing");
+            Toothpick.closeScope(SearchableActivityViewModelScope.class);
+        }
     }
 
     @Override
@@ -143,21 +155,31 @@ public class SearchableActivityViewModelImpl implements SearchableActivityViewMo
 
     public static class ScreenState extends BaseObservable {
         private boolean searchFinished;
-        private boolean searchResultEmpty;
+        private String searchStatus;
+        private int searchStatusTextColor;
 
-        public ScreenState(boolean searchFinished, boolean searchResultEmpty) {
-            this.searchFinished = searchFinished;
-            this.searchResultEmpty = searchResultEmpty;
+        public ScreenState() {
+
         }
 
         @Bindable
-        public boolean isSearchResultEmpty() {
-            return searchResultEmpty;
+        public int getSearchStatusTextColor() {
+            return searchStatusTextColor;
         }
 
-        public void setSearchResultEmpty(boolean searchResultEmpty) {
-            this.searchResultEmpty = searchResultEmpty;
-            notifyPropertyChanged(BR.searchResultEmpty);
+        public void setSearchStatusTextColor(int searchStatusTextColor) {
+            this.searchStatusTextColor = searchStatusTextColor;
+            notifyPropertyChanged(BR.searchStatusTextColor);
+        }
+
+        @Bindable
+        public String getSearchStatus() {
+            return searchStatus;
+        }
+
+        public void setSearchStatus(String searchStatus) {
+            this.searchStatus = searchStatus;
+            notifyPropertyChanged(BR.searchStatus);
         }
 
         @Bindable

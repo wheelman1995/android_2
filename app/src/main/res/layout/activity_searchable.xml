@@ -41,8 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@{!state.searchFinished ? @string/searching_for_cities : ``}"
-            android:textColor="#0000ff"
+            android:text="@{state.searchStatus}"
+            android:textColor="@{state.searchStatusTextColor}"
             android:textSize="24sp" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

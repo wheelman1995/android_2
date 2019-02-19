@@ -30,11 +30,12 @@ public class LocationUpdatesReceiver extends BroadcastReceiver {
         Toothpick.inject(this, Toothpick.openScope(ApplicationScope.class));
         Log.d(TAG, "onReceive");
         if (intent != null) {
+            Log.d(TAG, "onReceive: intent != null");
             final String action = intent.getAction();
             if (ACTION_PROCESS_UPDATES.equals(action)) {
 
                 LocationResult result = LocationResult.extractResult(intent);
-
+                Log.d(TAG, "onReceive: result !=null " + (result != null));
                 if (result != null) {
                     Location lastLocation = result.getLastLocation();
                     double latitude = lastLocation.getLatitude();

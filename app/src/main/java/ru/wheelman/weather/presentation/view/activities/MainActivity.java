@@ -10,10 +10,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.snackbar.Snackbar;
 
 import javax.inject.Inject;
 
@@ -22,8 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
@@ -66,15 +65,33 @@ public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private boolean homeReturnsUp;
     private AboutFragment aboutFragment;
-    private ImageView navDrawerHeaderForeground;
-    private ConstraintLayout navDrawerHeaderLayout;
-    private MenuItem search;
-    private ViewPager viewPager;
+    //    private ImageView navDrawerHeaderForeground;
+//    private ConstraintLayout navDrawerHeaderLayout;
+//    private MenuItem search;
+//    private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
-    private TabLayout tabLayout;
+    //    private TabLayout tabLayout;
     private CurrentWeatherFragment currentWeatherFragment;
     private FeedbackFragment feedbackFragment;
     private ForecastedWeatherFragment forecastedWeatherFragment;
+    private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener;
+    private ViewPager.OnPageChangeListener pageChangeListener;
+    private DrawerLayout.DrawerListener drawerListener;
+    private ActivityMainBinding binding;
+    private NavDrawerHeaderBinding navDrawerHeaderBinding;
+
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Log.d(TAG, "onAttachedToWindow: ");
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.d(TAG, "onDetachedFromWindow: ");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,19 +101,15 @@ public class MainActivity extends AppCompatActivity {
 
         initDataBinding();
 
-        initUi();
-
-        initListeners();
-
         initActionBar();
 
-        viewModel.onCreate(permissionsGranted());
+        checkPermissions();
     }
 
     private void checkPermissions() {
         boolean permissionsGranted = permissionsGranted();
 
-        viewModel.onStart(permissionsGranted);
+        viewModel.onCreate(permissionsGranted);
 
         if (!permissionsGranted) {
             if (shouldShowRequestPermissionRationale()) {
@@ -108,10 +121,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDataBinding() {
-        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        navDrawerHeaderBinding = NavDrawerHeaderBinding.bind(binding.navDrawerView.getHeaderView(0));
+
+        initUi(binding);
+
+        initVariables();
+
+        initListeners();
+
         binding.setState(viewModel.getScreenState());
-        NavDrawerHeaderBinding navDrawerHeaderBinding = NavDrawerHeaderBinding.bind(binding.navDrawerView.getHeaderView(0));
+        binding.setMainActivity(this);
+        binding.setViewPager(binding.viewPager);
         navDrawerHeaderBinding.setState(viewModel.getScreenState());
+    }
+
+    private void initVariables() {
+        pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+    }
+
+    private void initUi(ActivityMainBinding binding) {
+        drawerLayout = binding.drawerLayout;
+        navigationView = binding.navDrawerView;
+        setSupportActionBar(binding.myToolbar);
+    }
+
+    private void initActionBar() {
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setTitle(null);
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
     }
 
 
@@ -121,35 +160,31 @@ public class MainActivity extends AppCompatActivity {
         Toothpick.inject(this, scope);
     }
 
-//    private void initCityListDatabase() {
-//        cityListDB = new CityListDB(this).getReadableDatabase();
-//        CityListDatabase.init(getApplication());
-//    }
-
-    private void initActionBar() {
-        Toolbar toolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setTitle(null);
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+    public PagerAdapter getPagerAdapter() {
+        return pagerAdapter;
     }
 
-    private void initUi() {
-        viewPager = findViewById(R.id.view_pager);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_drawer_view);
-        navDrawerHeaderLayout = (ConstraintLayout) navigationView.getHeaderView(0);
-        navDrawerHeaderForeground = navDrawerHeaderLayout.findViewById(R.id.image_nav_drawer_header_foreground);
-        pagerAdapter = new PagerAdapter(getSupportFragmentManager());
-        tabLayout = viewPager.findViewById(R.id.tl_main);
-        viewPager.setAdapter(pagerAdapter);
-        tabLayout.setupWithViewPager(viewPager, true);
+    public NavigationView.OnNavigationItemSelectedListener getNavigationItemSelectedListener() {
+        return navigationItemSelectedListener;
+    }
+
+    public ViewPager.OnPageChangeListener getPageChangeListener() {
+        return pageChangeListener;
+    }
+
+    public DrawerLayout.DrawerListener getDrawerListener() {
+        return drawerListener;
     }
 
     private void initListeners() {
-        navigationView.setNavigationItemSelectedListener(item -> {
+
+        viewModel.isInternetConnected().observe(this, internetConnected -> {
+            if (internetConnected != null && !internetConnected) {
+                Snackbar.make(binding.clActivityMain, R.string.no_internet, Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        navigationItemSelectedListener = item -> {
             switch (item.getItemId()) {
                 case R.id.nav_drawer_settings:
 //                    Log.d(TAG, "nav_drawer_settings pressed");
@@ -168,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 drawerLayout.closeDrawers();
             }
             return true;
-        });
+        };
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
 
@@ -194,60 +229,7 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
         });
 
-        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
-            int dpi = getResources().getDisplayMetrics().densityDpi;
-            ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) navDrawerHeaderForeground.getLayoutParams();
-
-            int foregroundWidth = layoutParams.width; //in pixels
-            int foregroundHeight = layoutParams.height; //in pixels
-
-            int originalY = layoutParams.editorAbsoluteY; // in pixels
-            int originalX = layoutParams.editorAbsoluteX; // in pixels
-
-            int endX = navigationView.getLayoutParams().width / 2 - foregroundWidth / 2;
-            int endY = 20 * (dpi / 160); //20 in dp
-
-            int aX = originalX - (originalX - endX) * 2;
-            int aY = originalY;
-
-            //            int k = ((-2 * endX + 2 * aX) * (endX * endX + endY * endY - originalX * originalX - originalY * originalY) - 2 * endX * aX *aX - 2*endX*aY * aY + 2*endX*endX*endX+2*endX*endY*endY+2*originalX*aX*aX + 2*originalX*aY*aY - 2*originalX*endX*endX-2*originalX*endY*endY) / (2*originalY*2*endX-2*originalY*2*aX-2*endY*2*endX+2*endY*2*aX+2*endX*2*endY-2*endX*2*aY+2*originalX*2*aY - 2*originalX*2*endY);
-//            int h = (aX*aX + aY*aY - 2*aY*k-endX*endX-endY*endY+2*endY*k)/(-2*endX + 2*aX);
-            int h = endX;
-            int k = (endX * endX - 2 * endX * h + endY * endY - originalX * originalX + 2 * originalX * h - originalY * originalY) / (-2 * originalY + 2 * endY);
-
-            double r = Math.sqrt(Math.pow(originalX - h, 2) + Math.pow(originalY - k, 2));
-
-            int xDist = originalX - endX;
-            int yDist = originalY - endY;
-
-
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-
-                float targetX = originalX - xDist * slideOffset;
-                double d = 2d * k * 2d * k - 4d * (k * k - r * r + (Math.pow(targetX - h, 2d)));
-                float targetY = (float) ((2f * k - Math.sqrt(d)) / 2f);
-
-                navDrawerHeaderForeground.setX(targetX);
-                navDrawerHeaderForeground.setY(targetY);
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-
-            }
-
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-
-            }
-        });
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        pageChangeListener = new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -262,7 +244,62 @@ public class MainActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
 
             }
-        });
+        };
+
+        drawerListener = new DrawerLayout.DrawerListener() {
+            private AppCompatImageView navDrawerHeaderForegroundImage = navDrawerHeaderBinding.imageNavDrawerHeaderForeground;
+
+            private int dpi = getResources().getDisplayMetrics().densityDpi;
+            private ConstraintLayout.LayoutParams foregroundImageLayoutParams = (ConstraintLayout.LayoutParams) navDrawerHeaderForegroundImage.getLayoutParams();
+
+            private int foregroundImageWidth = foregroundImageLayoutParams.width; //in pixels
+
+            private int foregroundImageOriginalY = foregroundImageLayoutParams.editorAbsoluteY; // in pixels
+            private int foregroundImageOriginalX = foregroundImageLayoutParams.editorAbsoluteX; // in pixels
+
+            private int foregroundImageEndX = navigationView.getLayoutParams().width / 2 - foregroundImageWidth / 2;
+            private int foregroundImageEndY = 20 * (dpi / 160); //20 in dp
+
+            private int h = foregroundImageEndX;
+            private int k = (foregroundImageEndX * foregroundImageEndX - 2 * foregroundImageEndX * h + foregroundImageEndY * foregroundImageEndY - foregroundImageOriginalX * foregroundImageOriginalX + 2 * foregroundImageOriginalX * h - foregroundImageOriginalY * foregroundImageOriginalY) / (-2 * foregroundImageOriginalY + 2 * foregroundImageEndY);
+
+            private double r = Math.sqrt(Math.pow(foregroundImageOriginalX - h, 2) + Math.pow(foregroundImageOriginalY - k, 2));
+
+            private int foregroundImageDistanceX = foregroundImageOriginalX - foregroundImageEndX;
+
+            //            int yDist = foregroundImageOriginalY - foregroundImageEndY;
+//            int aX = foregroundImageOriginalX - (foregroundImageOriginalX - foregroundImageEndX) * 2;
+//            int aY = foregroundImageOriginalY;
+//
+//            int k = ((-2 * foregroundImageEndX + 2 * aX) * (foregroundImageEndX * foregroundImageEndX + foregroundImageEndY * foregroundImageEndY - foregroundImageOriginalX * foregroundImageOriginalX - foregroundImageOriginalY * foregroundImageOriginalY) - 2 * foregroundImageEndX * aX *aX - 2*foregroundImageEndX*aY * aY + 2*foregroundImageEndX*foregroundImageEndX*foregroundImageEndX+2*foregroundImageEndX*foregroundImageEndY*foregroundImageEndY+2*foregroundImageOriginalX*aX*aX + 2*foregroundImageOriginalX*aY*aY - 2*foregroundImageOriginalX*foregroundImageEndX*foregroundImageEndX-2*foregroundImageOriginalX*foregroundImageEndY*foregroundImageEndY) / (2*foregroundImageOriginalY*2*foregroundImageEndX-2*foregroundImageOriginalY*2*aX-2*foregroundImageEndY*2*foregroundImageEndX+2*foregroundImageEndY*2*aX+2*foregroundImageEndX*2*foregroundImageEndY-2*foregroundImageEndX*2*aY+2*foregroundImageOriginalX*2*aY - 2*foregroundImageOriginalX*2*foregroundImageEndY);
+//            int h = (aX*aX + aY*aY - 2*aY*k-foregroundImageEndX*foregroundImageEndX-foregroundImageEndY*foregroundImageEndY+2*foregroundImageEndY*k)/(-2*foregroundImageEndX + 2*aX);
+//            int foregroundHeight = foregroundImageLayoutParams.height; //in pixels
+
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+                float targetX = foregroundImageOriginalX - foregroundImageDistanceX * slideOffset;
+                double d = 2d * k * 2d * k - 4d * (k * k - r * r + (Math.pow(targetX - h, 2d)));
+                float targetY = (float) ((2f * k - Math.sqrt(d)) / 2f);
+
+                navDrawerHeaderForegroundImage.setX(targetX);
+                navDrawerHeaderForegroundImage.setY(targetY);
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        };
     }
 
     private boolean permissionsGranted() {
@@ -293,15 +330,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult");
-        //        Log.d(TAG, "onRequestPermissionsResult");
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                SearchSuggestionsProvider.setCurrentLocationSuggestionEnabled(true);
                 viewModel.onRequestPermissionsResult(true);
 
             } else {
-//                Log.d(TAG, "PERMISSION_NOT_GRANTED onRequestPermissionsResult");
-//                SearchSuggestionsProvider.setCurrentLocationSuggestionEnabled(false);
                 viewModel.onRequestPermissionsResult(false);
                 if (!shouldShowRequestPermissionRationale()) {
                     showPermissionDeniedWarning();
@@ -367,10 +400,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        search = menu.findItem(R.id.action_search);
+        MenuItem search = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) search.getActionView();
 
-        initOptionsMenuListeners(searchView);
+        initOptionsMenuListeners(search, searchView);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchableActivity.class)));
@@ -380,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void initOptionsMenuListeners(SearchView searchView) {
+    private void initOptionsMenuListeners(MenuItem search, SearchView searchView) {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -411,8 +444,6 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 search.collapseActionView();
-//                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
             }
         });
     }
@@ -442,14 +473,13 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart ");
-        checkPermissions();
+        viewModel.onStart(permissionsGranted());
     }
 
     @Override
@@ -467,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private class PagerAdapter extends FragmentPagerAdapter {
+    public class PagerAdapter extends FragmentPagerAdapter {
 
         PagerAdapter(FragmentManager fm) {
             super(fm);
@@ -490,15 +520,15 @@ public class MainActivity extends AppCompatActivity {
             switch (position) {
                 case CurrentWeatherFragment.ID_FOR_VIEW_PAGER:
                     return currentWeatherFragment = CurrentWeatherFragment.newInstance();
-//                case ForecastedWeatherFragment.ID_FOR_VIEW_PAGER:
-//                    return forecastedWeatherFragment = ForecastedWeatherFragment.newInstance();
+                case ForecastedWeatherFragment.ID_FOR_VIEW_PAGER:
+                    return forecastedWeatherFragment = ForecastedWeatherFragment.newInstance();
             }
             return null;
         }
 
         @Override
         public int getCount() {
-            return 1/*NUMBER_OF_PAGES*/;
+            return NUMBER_OF_PAGES;
         }
     }
 }

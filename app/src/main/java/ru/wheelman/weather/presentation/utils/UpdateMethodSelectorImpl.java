@@ -4,6 +4,7 @@ import android.util.Log;
 
 import javax.inject.Inject;
 
+import androidx.lifecycle.MutableLiveData;
 import ru.wheelman.weather.data.repositories.ISearchSuggestionsProvider;
 import ru.wheelman.weather.di.scopes.ApplicationScope;
 import ru.wheelman.weather.presentation.utils.worker.current.CurrentWeatherUpdateWorkerHelper;
@@ -19,9 +20,28 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     private PreferenceHelper preferenceHelper;
     private LocationHelper locationHelper;
     private ISearchSuggestionsProvider suggestionsProvider;
+    private IConnectivityHelper connectivityHelper;
+    private MutableLiveData<Boolean> internetConnected;
 
     @Inject
     UpdateMethodSelectorImpl() {
+        internetConnected = new MutableLiveData<>();
+    }
+
+    @Override
+    public MutableLiveData<Boolean> getInternetConnected() {
+        return internetConnected;
+    }
+
+    @Inject
+    void setConnectivityHelper(IConnectivityHelper connectivityHelper) {
+        this.connectivityHelper = connectivityHelper;
+    }
+
+    private boolean checkInternetConnected() {
+        boolean internetConnected = connectivityHelper.isInternetConnected();
+        this.internetConnected.setValue(internetConnected);
+        return internetConnected;
     }
 
     @Inject
@@ -54,29 +74,22 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     public void selectAndUpdate(int cityId) {
 
         if (suggestionsProvider.useYourLocationWasSelected(cityId)) {
-            if (!preferenceHelper.isListeningToLocationChanges()) {
-//            preferenceHelper.subscribeToLocationChanges(listener);
-                locationHelper.startListeningToLocationChanges();
-            }
+            safeStartListeningToLocationChanges();
         } else {
-            if (preferenceHelper.isListeningToLocationChanges()) {
-                locationHelper.stopListeningToLocationChanges();
-//            preferenceHelper.unsubscribeFromLocationChanges(listener);
-            }
-
+            safeStopListeningToLocationChanges();
 
             preferenceHelper.setLatestCityId(cityId);
             updateByCityId();
-
-
         }
     }
 
     private void updateByCityId() {
-        if (preferenceHelper.cityIdIsValid()) {
-            setDataIsBeingUpdated();
-            currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCityId();
-            forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCityId();
+        if (checkInternetConnected()) {
+            if (preferenceHelper.cityIdIsValid()) {
+                setDataIsBeingUpdated();
+                currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCityId();
+                forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCityId();
+            }
         }
     }
 
@@ -88,18 +101,27 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     @Override
     public void selectAndUpdate() {
         if (preferenceHelper.isListeningToLocationChanges()) {
-            updateByCoordinates();
+            forceRestartLocationListener();
         } else {
             updateByCityId();
         }
     }
 
+    private void forceRestartLocationListener() {
+        if (checkInternetConnected()) {
+            locationHelper.stopListeningToLocationChanges();
+            locationHelper.startListeningToLocationChanges();
+        }
+    }
+
     @Override
     public void updateByCoordinates() {
-        if (locationHelper.coordinatesAreValid()) {
-            setDataIsBeingUpdated();
-            currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCoordinates();
-            forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCoordinates();
+        if (checkInternetConnected()) {
+            if (locationHelper.coordinatesAreValid()) {
+                setDataIsBeingUpdated();
+                currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCoordinates();
+                forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCoordinates();
+            }
         }
     }
 
@@ -115,29 +137,55 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
 
 
     @Override
-    public void permissionsRevoked() {
+    public void appRestoredWithoutLocationServices() {
         if (preferenceHelper.isListeningToLocationChanges()) {
             locationHelper.stopListeningToLocationChanges();
             updateByCityId();
         }
     }
 
-
     @Override
-    public void onAppNormalStart(boolean permissionsGranted) {
-        Log.d(TAG, "onAppNormalStart");
-        if (preferenceHelper.isListeningToLocationChanges()) {
-            locationHelper.startListeningToLocationChanges();
-        } else {
-            updateByCityId();
+    public void onAppNormalStart(boolean updateByLocationAllowed) {
+
+        if (updateByLocationAllowed && preferenceHelper.isListeningToLocationChanges()) {
+            Log.d(TAG, "onAppNormalStart perm list");
+            if (checkInternetConnected()) {
+                locationHelper.startListeningToLocationChanges();
+            }
+            return;
         }
+
+        if (!updateByLocationAllowed && preferenceHelper.isListeningToLocationChanges()) {
+            Log.d(TAG, "onAppNormalStart !perm list");
+            locationHelper.stopListeningToLocationChanges();
+        }
+        Log.d(TAG, "onAppNormalStart updateByCityId");
+
+        updateByCityId();
     }
 
     @Override
-    public void onAppFirstStart(boolean permissionsGranted) {
-        Log.d(TAG, "onAppFirstStart");
-        if (permissionsGranted) {
-            locationHelper.startListeningToLocationChanges();
+    public void onAppFirstStart(boolean updateByLocationAllowed) {
+        if (updateByLocationAllowed) {
+            Log.d(TAG, "onAppFirstStart updateByLocationAllowed");
+            safeStartListeningToLocationChanges();
+        } else {
+            Log.d(TAG, "onAppFirstStart !updateByLocationAllowed");
+            safeStopListeningToLocationChanges();
+        }
+    }
+
+    private void safeStartListeningToLocationChanges() {
+        if (checkInternetConnected()) {
+            if (!preferenceHelper.isListeningToLocationChanges()) {
+                locationHelper.startListeningToLocationChanges();
+            }
+        }
+    }
+
+    private void safeStopListeningToLocationChanges() {
+        if (preferenceHelper.isListeningToLocationChanges()) {
+            locationHelper.stopListeningToLocationChanges();
         }
     }
 

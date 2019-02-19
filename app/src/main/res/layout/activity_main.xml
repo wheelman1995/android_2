@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="state"
             type="ru.wheelman.weather.presentation.view_model.MainActivityViewModelImpl.ScreenState" />
+
+        <variable
+            name="mainActivity"
+            type="ru.wheelman.weather.presentation.view.activities.MainActivity" />
+
+        <variable
+            name="viewPager"
+            type="androidx.viewpager.widget.ViewPager" />
     </data>
 
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
+        app:addDrawerListener="@{mainActivity.drawerListener}"
         android:layout_width="match_parent"
+        tools:openDrawer="start"
+
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
@@ -34,6 +46,8 @@
                 android:id="@+id/view_pager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:adapter="@{mainActivity.pagerAdapter}"
+                app:addOnPageChangeListener="@{mainActivity.pageChangeListener}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/my_toolbar">
 
@@ -43,6 +57,7 @@
                     android:layout_height="48dp"
                     android:background="@android:color/holo_blue_dark"
                     android:elevation="4dp"
+                    app:setupWithViewPager="@{viewPager}"
                     app:tabIndicatorColor="#2a2828">
 
                     <!--<com.google.android.material.tabs.TabItem-->
@@ -76,6 +91,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:elevation="8dp"
+            app:navigationItemSelectedListener="@{mainActivity.navigationItemSelectedListener}"
             android:fitsSystemWindows="true"
             app:headerLayout="@layout/nav_drawer_header"
             app:menu="@menu/nav_drawer_menu">

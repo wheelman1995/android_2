@@ -19,7 +19,7 @@ import ru.wheelman.weather.presentation.view.fragments.SettingsFragment;
 public class LocationHelperImpl implements LocationHelper {
 
     //    private LocationCallback locationCallback;
-    private static final long FASTEST_INTERVAL = 1000L * 60L * 30L; // 30 min
+//    private static final long FASTEST_INTERVAL = 1000L * 60L * 30L; // 30 min
     //    private static final long INTERVAL = 1000L * 60L * 60L; // 60 min
     private static final float SMALLEST_DISPLACEMENT = 5_000f; // 5 kilometers
     private static final String TAG = LocationHelperImpl.class.getSimpleName();
@@ -40,7 +40,7 @@ public class LocationHelperImpl implements LocationHelper {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
         locationRequest = new LocationRequest()
-                .setFastestInterval(FASTEST_INTERVAL)
+                .setFastestInterval(SettingsFragment.UPDATE_INTERVAL_MILLISECONDS)
                 .setInterval(SettingsFragment.UPDATE_INTERVAL_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_LOW_POWER);
 //                .setSmallestDisplacement(SMALLEST_DISPLACEMENT);

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.wheelman.weather.data.data_sources.network.ForecastMapper;
+import ru.wheelman.weather.data.data_sources.network.IOpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.OpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.UnitsMapper;
 import ru.wheelman.weather.data.data_sources.network.forecasted.model.ForecastedWeatherXML;
@@ -26,11 +27,11 @@ public class ForecastedWeatherRemoteDataSourceImpl implements ForecastedWeatherR
     @ApiKeyQualifier
     String apiKey;
 
-    private ForecastedWeatherService forecastedWeatherService;
+    private IOpenWeatherAPI openWeatherAPI;
 
     @Inject
-    public ForecastedWeatherRemoteDataSourceImpl(ForecastedWeatherService forecastedWeatherService) {
-        this.forecastedWeatherService = forecastedWeatherService;
+    public ForecastedWeatherRemoteDataSourceImpl(IOpenWeatherAPI openWeatherAPI) {
+        this.openWeatherAPI = openWeatherAPI;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class ForecastedWeatherRemoteDataSourceImpl implements ForecastedWeatherR
         Units units = preferenceHelper.getUnits();
         String mUnits = UnitsMapper.mapUnits(units);
 
-        Call<ForecastedWeatherXML> forecastedWeatherXMLCall = forecastedWeatherService.loadForecastedWeatherData(
+        Call<ForecastedWeatherXML> forecastedWeatherXMLCall = openWeatherAPI.loadForecastedWeatherData(
                 preferenceHelper.getLatestCityId(),
                 mUnits,
                 apiKey,
@@ -60,10 +61,9 @@ public class ForecastedWeatherRemoteDataSourceImpl implements ForecastedWeatherR
 
     @Override
     public FiveDayForecast requestFiveDayForecastByCoordinates() {
-
         String mUnits = UnitsMapper.mapUnits(preferenceHelper.getUnits());
 
-        Call<ForecastedWeatherXML> forecastedWeatherXMLCall = forecastedWeatherService.loadForecastedWeatherDataByCoordinates(
+        Call<ForecastedWeatherXML> forecastedWeatherXMLCall = openWeatherAPI.loadForecastedWeatherDataByCoordinates(
                 preferenceHelper.getLatitude(),
                 preferenceHelper.getLongitude(),
                 mUnits,

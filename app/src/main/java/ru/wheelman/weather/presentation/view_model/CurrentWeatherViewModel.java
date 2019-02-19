@@ -1,6 +1,7 @@
 package ru.wheelman.weather.presentation.view_model;
 
 public interface CurrentWeatherViewModel {
+
     CurrentWeatherViewModelImpl.ScreenState getScreenState();
 
     void onRefreshSwipeRefreshLayout();
@@ -8,4 +9,6 @@ public interface CurrentWeatherViewModel {
     void onStart();
 
     void onStop();
+
+    void onViewCreated();
 }

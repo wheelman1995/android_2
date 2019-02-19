@@ -18,9 +18,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import ru.wheelman.weather.R;
 import ru.wheelman.weather.databinding.ActivitySearchableBinding;
-import ru.wheelman.weather.di.modules.SearchableActivityModule;
+import ru.wheelman.weather.di.modules.SearchableActivityViewModelModule;
 import ru.wheelman.weather.di.scopes.ApplicationScope;
 import ru.wheelman.weather.di.scopes.SearchableActivityScope;
+import ru.wheelman.weather.di.scopes.SearchableActivityViewModelScope;
 import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 import ru.wheelman.weather.presentation.view_model.SearchableActivityViewModel;
 import ru.wheelman.weather.presentation.view_model.SearchableActivityViewModelImpl;
@@ -61,9 +62,16 @@ public class SearchableActivity extends ListActivity {
     }
 
     private void initToothpick() {
-        Scope scope = Toothpick.openScopes(ApplicationScope.class, SearchableActivityScope.class);
-        scope.installModules(new SearchableActivityModule(this));
+
+        if (!Toothpick.isScopeOpen(SearchableActivityViewModelScope.class)) {
+            Scope viewModelScope = Toothpick.openScopes(ApplicationScope.class, SearchableActivityViewModelScope.class);
+            viewModelScope.installModules(new SearchableActivityViewModelModule());
+        }
+
+        Scope scope = Toothpick.openScopes(ApplicationScope.class, SearchableActivityViewModelScope.class, SearchableActivityScope.class);
         Toothpick.inject(this, scope);
+
+        Log.d(TAG, viewModel.toString());
     }
 
 
@@ -129,7 +137,7 @@ public class SearchableActivity extends ListActivity {
 
     @Override
     protected void onDestroy() {
-        viewModel.onDestroy();
+        viewModel.onDestroy(isFinishing());
         removeLiveCursorObserverAndCloseCursor();
         Toothpick.closeScope(SearchableActivityScope.class);
         super.onDestroy();

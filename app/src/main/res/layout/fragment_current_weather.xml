@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="matrix"
-                app:imageURI="@{state.backgroundURI}" />
+                app:imageURIwithBottomCrop="@{state.backgroundURI}" />
 
             <androidx.appcompat.widget.ContentFrameLayout
                 android:id="@+id/fl_ambient"
@@ -163,7 +163,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:scaleType="centerCrop"
-                app:imageBitmap="@{state.weatherIcon}"
+                app:imageURL="@{state.weatherIconURL}"
                 app:layout_constraintEnd_toEndOf="@id/tv_weather_condition_description"
                 app:layout_constraintStart_toStartOf="@id/tv_weather_condition_description"
                 app:layout_constraintTop_toTopOf="@id/tv_current_temperature_value" />

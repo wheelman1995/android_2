@@ -1,11 +1,14 @@
 package ru.wheelman.weather.presentation.view_model;
 
+import android.content.Context;
+import android.location.LocationManager;
 import android.util.Log;
 
 import javax.inject.Inject;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import ru.wheelman.weather.BR;
 import ru.wheelman.weather.data.repositories.ISearchSuggestionsProvider;
@@ -22,7 +25,8 @@ public class MainActivityViewModelImpl extends ViewModel implements MainActivity
     private static final String TAG = MainActivityViewModelImpl.class.getSimpleName();
     @Inject
     UpdateMethodSelector updateMethodSelector;
-
+    @Inject
+    Context context;
     @Inject
     ISearchSuggestionsProvider suggestionsProvider;
     //    @Inject
@@ -31,13 +35,20 @@ public class MainActivityViewModelImpl extends ViewModel implements MainActivity
     ScreenState screenState;
     @Inject
     PreferenceHelper preferenceHelper;
+
     private boolean activityWasRecreated;
     private boolean weatherUpdateAfterProcessDeathPerformed;
+    private boolean updateByLocationAllowed;
 
     public MainActivityViewModelImpl() {
         Scope scope = Toothpick.openScopes(ApplicationScope.class, MainActivityViewModelScope.class);
         scope.installModules(new MainActivityViewModelModule());
         Toothpick.inject(this, scope);
+    }
+
+    @Override
+    public LiveData<Boolean> isInternetConnected() {
+        return updateMethodSelector.getInternetConnected();
     }
 
     @Override
@@ -47,54 +58,76 @@ public class MainActivityViewModelImpl extends ViewModel implements MainActivity
 
     @Override
     protected void onCleared() {
+        Log.d(TAG, "onCleared: ");
         Toothpick.closeScope(MainActivityViewModelScope.class);
         super.onCleared();
     }
 
     @Override
     public void onRequestPermissionsResult(boolean permissionsGranted) {
-        Log.d(TAG, "onRequestPermissionsResult " + permissionsGranted);
+        updateByLocationAllowed = permissionsGranted && locationServicesEnabled();
+        Log.d(TAG, "onRequestPermissionsResult updateByLocationAllowed " + updateByLocationAllowed);
 
-        suggestionsProvider.setLocationFeatures(permissionsGranted);
+        suggestionsProvider.setLocationFeatures(updateByLocationAllowed);
 
-        if (!weatherUpdateAfterProcessDeathPerformed) {
-            updateWeatherAfterProcessDeath(permissionsGranted);
-        } else {
-            if (!permissionsGranted) {
-                updateMethodSelector.permissionsRevoked();
-            }
-        }
+        checkProcessDiedAndUpdate();
+    }
 
+    private boolean locationServicesEnabled() {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     @Override
     public void onStop() {
-//        weatherUpdateTrigger.stop();
     }
 
     @Override
     public void onStart(boolean permissionsGranted) {
-//        weatherUpdateTrigger.start();
-        Log.d(TAG, "onStart permissionsGranted " + permissionsGranted);
-        suggestionsProvider.setLocationFeatures(permissionsGranted);
+        if (!permissionsGranted) {
+            return;
+        }
+
+        updateByLocationAllowed = locationServicesEnabled();
+        Log.d(TAG, "onStart update by location allowed " + updateByLocationAllowed);
+
+        suggestionsProvider.setLocationFeatures(updateByLocationAllowed);
+
+        checkProcessDiedAndUpdate();
     }
 
-    @Override
-    public void onCreate(boolean permissionsGranted) {
-        if (permissionsGranted) {
-            if (!weatherUpdateAfterProcessDeathPerformed) {
-                updateWeatherAfterProcessDeath(true);
+    private void checkProcessDiedAndUpdate() {
+        if (!weatherUpdateAfterProcessDeathPerformed) {
+            updateWeatherAfterProcessDeath(updateByLocationAllowed);
+        } else {
+            if (!updateByLocationAllowed) {
+                updateMethodSelector.appRestoredWithoutLocationServices();
             }
         }
     }
 
-    private void updateWeatherAfterProcessDeath(boolean permissionsGranted) {
+    @Override
+    public void onCreate(boolean permissionsGranted) {
+        if (!permissionsGranted) {
+            return;
+        }
+        updateByLocationAllowed = locationServicesEnabled();
+        Log.d(TAG, "onCreate: updateByLocationAllowed: " + updateByLocationAllowed);
+
+        if (!weatherUpdateAfterProcessDeathPerformed && updateByLocationAllowed) {
+            updateWeatherAfterProcessDeath(true);
+        }
+    }
+
+    private void updateWeatherAfterProcessDeath(boolean updateByLocationAllowed) {
         if (preferenceHelper.isFirstStart()) {
-            updateMethodSelector.onAppFirstStart(permissionsGranted);
+            updateMethodSelector.onAppFirstStart(updateByLocationAllowed);
         } else {
-            updateMethodSelector.onAppNormalStart(permissionsGranted);
+            updateMethodSelector.onAppNormalStart(updateByLocationAllowed);
         }
         weatherUpdateAfterProcessDeathPerformed = true;
+
     }
 
     @Override

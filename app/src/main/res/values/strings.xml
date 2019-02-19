@@ -1,4 +1,6 @@
 <resources>
+    <string name="forecasted_min_max_temperature_template">%.1f/%.1f%s</string>
+    <string name="forecasted_one_value_temperature_template">%.1f%s</string>
     <string name="app_name">Weather</string>
     <string name="search">search</string>
     <string name="search_city">Search for a city</string>
@@ -11,7 +13,7 @@
     <string name="celsius">%.1f\u2103</string>
     <string name="fahrenheit">%.1f\u2109</string>
     <string name="service_description">This service is essential to provide weather updates</string>
-    <string name="no_data_available">No data available!</string>
+    <string name="nothing_found">Nothing found!</string>
     <string name="temp_units_setting_question">What weather temperature units do you prefer?</string>
     <string name="current_weather">Current weather</string>
     <string name="data_receiving_time">Data as of:</string>
@@ -40,6 +42,7 @@
     <string name="forecast_fragment_today">Today</string>
     <string name="city_and_country">%s, %s</string>
     <string name="location_symbol">\u2316</string>
+    <string name="no_internet">No internet connection available!</string>
 
     <string-array name="temp_setting_values">
         <item>Celsius</item>

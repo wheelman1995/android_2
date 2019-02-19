@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
-        <!--<variable-->
-        <!--name=""-->
-        <!--type="" />-->
+        <variable
+            name="adapter"
+            type="ru.wheelman.weather.presentation.view_model.ForecastedWeatherViewModelImpl.AdapterViewModel" />
+
+        <variable
+            name="position"
+            type="Integer" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,6 +20,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_date"
+            android:text="@{adapter.dates[(safeUnbox(position))]}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -24,50 +30,59 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="date" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_forecasted_weather_condition_description"
             android:layout_width="wrap_content"
+            android:text="@{adapter.weatherConditionDescriptions[(safeUnbox(position))]}"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="5dp"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_date" />
+            app:layout_constraintTop_toBottomOf="@id/tv_date"
+            tools:text="condition" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_day_temperature"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:text="@{adapter.dayTemperatures[(safeUnbox(position))]}"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="3dp"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="day min max temp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_night_temperature"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
+            android:text="@{adapter.nightTemperatures[(safeUnbox(position))]}"
             android:layout_marginBottom="5dp"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_day_temperature" />
+            app:layout_constraintTop_toBottomOf="@id/tv_day_temperature"
+            tools:text="night min max temp" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_forecasted_weather_icon"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
+            app:imageURL="@{adapter.weatherIconURLs[(safeUnbox(position))]}"
             android:layout_marginEnd="112dp"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/sun" />
 
         <!--<androidx.constraintlayout.widget.Barrier-->
         <!--android:id="@+id/b_forecast_temperature"-->

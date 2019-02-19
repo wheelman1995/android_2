@@ -2,21 +2,8 @@ package ru.wheelman.weather.presentation.view_model;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -26,12 +13,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import ru.wheelman.weather.BR;
-import ru.wheelman.weather.R;
+import ru.wheelman.weather.di.modules.CurrentWeatherViewModelModule;
 import ru.wheelman.weather.di.scopes.ApplicationScope;
 import ru.wheelman.weather.di.scopes.CurrentWeatherViewModelScope;
 import ru.wheelman.weather.di.scopes.MainActivityViewModelScope;
 import ru.wheelman.weather.domain.entities.CurrentWeatherConditions;
 import ru.wheelman.weather.domain.interactors.CurrentWeatherInteractor;
+import ru.wheelman.weather.presentation.data_mappers.DataMapper;
 import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 import ru.wheelman.weather.presentation.utils.UpdateMethodSelector;
 import toothpick.Scope;
@@ -40,7 +28,7 @@ import toothpick.Toothpick;
 public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWeatherViewModel {
 
     private static final String TAG = CurrentWeatherViewModelImpl.class.getSimpleName();
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM, HH:mm", Locale.UK);
+
     @Inject
     PreferenceHelper preferenceHelper;
     @Inject
@@ -50,7 +38,8 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
     @Inject
     UpdateMethodSelector updateMethodSelector;
     @Inject
-    MainActivityViewModelImpl.ScreenState mainActivityScreenState;
+    DataMapper<CurrentWeatherConditions, ScreenState> dataMapper;
+
     private PreferenceHelper.LatestCityIdListener latestCityIdListener;
     private LiveData<CurrentWeatherConditions> liveCurrentWeatherConditions;
     private Observer<CurrentWeatherConditions> currentWeatherConditionsObserver;
@@ -60,22 +49,31 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
     public CurrentWeatherViewModelImpl() {
         initToothpick();
 
-        screenState = new ScreenState();
-        DATE_FORMAT.setTimeZone(TimeZone.getDefault());
+        initVariables();
 
         initListeners();
 
     }
 
+    private void initVariables() {
+        screenState = new ScreenState();
+    }
+
     private void initToothpick() {
         Scope scope = Toothpick.openScopes(ApplicationScope.class, MainActivityViewModelScope.class, CurrentWeatherViewModelScope.class);
+        scope.installModules(new CurrentWeatherViewModelModule());
         Toothpick.inject(this, scope);
     }
 
     private void initListeners() {
         latestCityIdListener = this::updateWeather;
 
-        currentWeatherConditionsObserver = this::processNewCurrentWeatherConditions;
+        currentWeatherConditionsObserver = currentWeatherConditions -> {
+            if (currentWeatherConditions != null) {
+                clearScreen();
+                dataMapper.map(currentWeatherConditions, screenState);
+            }
+        };
 
         currentWeatherUpdateStatusListener = () -> {
             screenState.setCurrentWeatherIsBeingUpdated(preferenceHelper.currentWeatherIsBeingUpdated());
@@ -83,102 +81,10 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
 
     }
 
-    private void processNewCurrentWeatherConditions(CurrentWeatherConditions currentWeatherConditions) {
-        if (currentWeatherConditions != null) {
-
-            String actionBarTitle = context.getString(
-                    R.string.city_and_country,
-                    currentWeatherConditions.getCityName(),
-                    currentWeatherConditions.getCountry());
-
-            if (preferenceHelper.isListeningToLocationChanges()) {
-                actionBarTitle += " " + context.getString(R.string.location_symbol);
-            }
-
-            mainActivityScreenState.setActionBarTitle(actionBarTitle);
-
-            long currentUTC = Calendar.getInstance().getTimeInMillis();
-            long sunrise = currentWeatherConditions.getSunrise() * 1000L;// to milliseconds
-            long sunset = currentWeatherConditions.getSunset() * 1000L;
-//            Log.d(TAG, "cur: " + currentUTC + " sunset " + sunset + " sunrise " + sunrise);
-            //day
-            if (sunrise < currentUTC && currentUTC < sunset) {
-                //            Log.d(TAG, "day");
-                mainActivityScreenState.setNavDrawerHeaderBackgroundDrawableId(R.drawable.day);
-                mainActivityScreenState.setNavDrawerHeaderForegroundDrawableId(R.drawable.sun);
-            } else {
-                //night
-                //            Log.d(TAG, "night");
-                mainActivityScreenState.setNavDrawerHeaderBackgroundDrawableId(R.drawable.night);
-                mainActivityScreenState.setNavDrawerHeaderForegroundDrawableId(R.drawable.crescent);
-            }
-
-            Date date = new Date(currentWeatherConditions.getDataReceivingTime() * 1000);
-            screenState.setDataReceivingTime(DATE_FORMAT.format(date));
-
-            date.setTime(currentWeatherConditions.getUpdateTime());
-            screenState.setUpdateTime(DATE_FORMAT.format(date));
-
-            int temperatureRes = 0;
-            switch (currentWeatherConditions.getUnits()) {
-                case CELSIUS:
-                    temperatureRes = R.string.celsius;
-                    break;
-                case FAHRENHEIT:
-                    temperatureRes = R.string.fahrenheit;
-                    break;
-            }
-            screenState.setTemperature(context.getString(temperatureRes, currentWeatherConditions.getTemperature()));
-
-
-            downloadBitmap(currentWeatherConditions.getWeatherIconURL());
-
-            screenState.setWeatherConditionDescription(currentWeatherConditions.getWeatherConditionDescription());
-
-            Log.d(TAG, "original icon url " + currentWeatherConditions.getWeatherIconURL());
-            Matcher matcher = Pattern.compile("\\d{2}[n,d]").matcher(currentWeatherConditions.getWeatherIconURL());
-            if (matcher.find()) {
-                String iconId = matcher.group();
-                screenState.setBackgroundURI(Uri.parse(String.format(
-                        Locale.UK,
-                        "android.resource://%s/drawable/b%s",
-                        context.getPackageName(),
-                        iconId)));
-                screenState.setBackgroundIsDark(iconId.endsWith("n"));
-                Log.d(TAG, "icon id " + iconId);
-            }
-        }
-
-    }
-
-    private void downloadBitmap(String weatherIconURL) {
-        Picasso.get().load(weatherIconURL).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                screenState.setWeatherIcon(bitmap);
-            }
-
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
-    }
-
-
     @Override
     public ScreenState getScreenState() {
         return screenState;
     }
-
-//    private void createDb() {
-//        db = Database.getDatabase(getApplication());
-//    }
 
     private void updateWeather() {
         Log.d(TAG, "latest city id changed");
@@ -197,6 +103,7 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
 
     @Override
     protected void onCleared() {
+        Log.d(TAG, "onCleared: ");
 //        Database.destroyInstance();
         removeCurrentWeatherConditionsObserver();
         Toothpick.closeScope(CurrentWeatherViewModelScope.class);
@@ -206,7 +113,11 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
     @Override
     public void onRefreshSwipeRefreshLayout() {
         updateMethodSelector.selectAndUpdate();
-        preferenceHelper.setCurrentWeatherIsBeingUpdated(true);
+
+        Boolean internetConnected = updateMethodSelector.getInternetConnected().getValue();
+        if (internetConnected != null && !internetConnected) {
+            screenState.setCurrentWeatherIsBeingUpdated(false);
+        }
     }
 
     @Override
@@ -221,11 +132,25 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
         preferenceHelper.unsubscribeFromCurrentWeatherUpdateStatusChanges(currentWeatherUpdateStatusListener);
     }
 
+    @Override
+    public void onViewCreated() {
+        updateWeather();
+    }
+
+    private void clearScreen() {
+        screenState.setDataReceivingTime(null);
+        screenState.setTemperature(null);
+        screenState.setWeatherIconURL(null);
+        screenState.setWeatherConditionDescription(null);
+        screenState.setBackgroundURI(null);
+        screenState.setUpdateTime(null);
+    }
+
     public static class ScreenState extends BaseObservable {
         private boolean currentWeatherIsBeingUpdated;
         private String dataReceivingTime;
         private String temperature;
-        private Bitmap weatherIcon;
+        private String weatherIconURL;
         private String weatherConditionDescription;
         private Uri backgroundURI;
         private String updateTime;
@@ -272,13 +197,13 @@ public class CurrentWeatherViewModelImpl extends ViewModel implements CurrentWea
         }
 
         @Bindable
-        public Bitmap getWeatherIcon() {
-            return weatherIcon;
+        public String getWeatherIconURL() {
+            return weatherIconURL;
         }
 
-        public void setWeatherIcon(Bitmap weatherIcon) {
-            this.weatherIcon = weatherIcon;
-            notifyPropertyChanged(BR.weatherIcon);
+        public void setWeatherIconURL(String weatherIconURL) {
+            this.weatherIconURL = weatherIconURL;
+            notifyPropertyChanged(BR.weatherIconURL);
         }
 
         @Bindable

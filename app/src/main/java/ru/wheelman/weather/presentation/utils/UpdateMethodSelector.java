@@ -1,15 +1,19 @@
 package ru.wheelman.weather.presentation.utils;
 
+import androidx.lifecycle.MutableLiveData;
+
 public interface UpdateMethodSelector {
+    MutableLiveData<Boolean> getInternetConnected();
+
     void selectAndUpdate(int cityId);
 
     void selectAndUpdate();
 
     void updateByCoordinates();
 
-    void permissionsRevoked();
+    void onAppFirstStart(boolean updateByLocationAllowed);
 
-    void onAppFirstStart(boolean permissionsGranted);
+    void onAppNormalStart(boolean updateByLocationAllowed);
 
-    void onAppNormalStart(boolean permissionsGranted);
+    void appRestoredWithoutLocationServices();
 }

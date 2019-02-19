@@ -12,7 +12,7 @@ public interface SearchableActivityViewModel {
 
     void onListItemClick(Cursor cursor);
 
-    void onDestroy();
+    void onDestroy(boolean finishing);
 
     SearchableActivityViewModelImpl.ScreenState getScreenState();
 }

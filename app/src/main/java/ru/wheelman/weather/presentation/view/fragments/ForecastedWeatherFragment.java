@@ -5,16 +5,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.RecyclerView;
-import ru.wheelman.weather.R;
 import ru.wheelman.weather.databinding.FragmentForecastBinding;
+import ru.wheelman.weather.di.modules.ForecastedWeatherFragmentModule;
+import ru.wheelman.weather.di.scopes.ApplicationScope;
+import ru.wheelman.weather.di.scopes.ForecastedWeatherFragmentScope;
+import ru.wheelman.weather.di.scopes.ForecastedWeatherViewModelScope;
+import ru.wheelman.weather.presentation.data_binding.IBindingAdapters;
 import ru.wheelman.weather.presentation.view_model.ForecastedWeatherViewModel;
+import toothpick.Scope;
+import toothpick.Toothpick;
 
 
 public class ForecastedWeatherFragment extends Fragment {
@@ -22,36 +27,46 @@ public class ForecastedWeatherFragment extends Fragment {
     private static final String TAG = ForecastedWeatherFragment.class.getSimpleName();
     @Inject
     ForecastedWeatherViewModel viewModel;
-
-    private RecyclerView recyclerView;
-    private ForecastedWeatherFragmentAdapter recyclerViewAdapter;
-
-    private ArrayList<String> dates;
-    private ArrayList<String> weatherConditionDescriptions;
-    private ArrayList<String> dayTemperatures;
-    private ArrayList<String> nightTemperatures;
-    private ArrayList<String> iconURLs;
+    @Inject
+    IBindingAdapters bindingComponent;
+    @Inject
+    ForecastedWeatherFragmentAdapter adapter;
+    private FragmentForecastBinding binding;
+    private DividerItemDecoration dividerItemDecoration;
 
     public static ForecastedWeatherFragment newInstance() {
 
         return new ForecastedWeatherFragment();
     }
 
+    public ForecastedWeatherFragmentAdapter getAdapter() {
+        return adapter;
+    }
+
+    public DividerItemDecoration getDividerItemDecoration() {
+        return dividerItemDecoration;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FragmentForecastBinding binding = FragmentForecastBinding.inflate(inflater, container, false);
+        initToothpick();
+
+        binding = FragmentForecastBinding.inflate(inflater, container, false, bindingComponent);
+
+        initVariables();
+        initListeners();
+
         binding.setFragment(this);
         binding.setViewModel(viewModel);
         binding.setState(viewModel.getScreenState());
 
-        View root = binding.getRoot();
+        return binding.getRoot();
+    }
 
-        initUi(root);
-
-        initListeners();
-
-        return root;
+    private void initToothpick() {
+        Scope scope = Toothpick.openScopes(ApplicationScope.class, ForecastedWeatherViewModelScope.class, ForecastedWeatherFragmentScope.class);
+        scope.installModules(new ForecastedWeatherFragmentModule(this));
+        Toothpick.inject(this, scope);
     }
 
     private void initListeners() {
@@ -151,15 +166,13 @@ public class ForecastedWeatherFragment extends Fragment {
 
     }
 
-    private void initUi(View view) {
-        recyclerView = view.findViewById(R.id.rv_fragment_forecast);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        viewModel.onViewCreated();
+    }
 
-        weatherConditionDescriptions = new ArrayList<>();
-        dates = new ArrayList<>();
-        dayTemperatures = new ArrayList<>();
-        nightTemperatures = new ArrayList<>();
-        iconURLs = new ArrayList<>();
+    private void initVariables() {
+        dividerItemDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
     }
 
     @Override
@@ -175,7 +188,9 @@ public class ForecastedWeatherFragment extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onDestroyView() {
+        adapter.onDestroyView();
+        Toothpick.closeScope(ForecastedWeatherFragmentScope.class);
+        super.onDestroyView();
     }
 }

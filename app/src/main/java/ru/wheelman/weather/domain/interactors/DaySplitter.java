@@ -10,10 +10,10 @@ public class DaySplitter {
     private final FiveDayForecast.OneDay day;
     private List<FiveDayForecast.OneDay.DataPiece> dayDataPieces;
     private List<FiveDayForecast.OneDay.DataPiece> nightDataPieces;
-    private float minDayTemperature;
-    private float minNightTemperature;
-    private float maxDayTemperature;
-    private float maxNightTemperature;
+    private Float minDayTemperature;
+    private Float minNightTemperature;
+    private Float maxDayTemperature;
+    private Float maxNightTemperature;
 
     public DaySplitter(FiveDayForecast.OneDay day) {
         this.day = day;
@@ -26,19 +26,35 @@ public class DaySplitter {
         calculateMinMaxTemperatures();
     }
 
-    public float getMinDayTemperature() {
+
+    /**
+     * @return minimal day temperature or <code>null</code>, if there is no data up to the sunset.
+     */
+    public Float getMinDayTemperature() {
         return minDayTemperature;
     }
 
-    public float getMinNightTemperature() {
+    /**
+     * @return minimal night temperature or <code>null</code>, if there is no data up to the sunrise.
+     */
+
+    public Float getMinNightTemperature() {
         return minNightTemperature;
     }
 
-    public float getMaxDayTemperature() {
+    /**
+     * @return maximal day temperature or <code>null</code>, if there is no data up to the sunset.
+     */
+
+    public Float getMaxDayTemperature() {
         return maxDayTemperature;
     }
 
-    public float getMaxNightTemperature() {
+    /**
+     * @return maximal night temperature or <code>null</code>, if there is no data up to the sunrise.
+     */
+
+    public Float getMaxNightTemperature() {
         return maxNightTemperature;
     }
 
@@ -51,11 +67,15 @@ public class DaySplitter {
     }
 
     private void calculateMinMaxTemperatures() {
-        minDayTemperature = Collections.min(dayDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
-        maxDayTemperature = Collections.max(dayDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+        if (!dayDataPieces.isEmpty()) {
+            minDayTemperature = Collections.min(dayDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+            maxDayTemperature = Collections.max(dayDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+        }
 
-        minNightTemperature = Collections.min(nightDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
-        maxNightTemperature = Collections.min(nightDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+        if (!nightDataPieces.isEmpty()) {
+            minNightTemperature = Collections.min(nightDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+            maxNightTemperature = Collections.max(nightDataPieces, (o1, o2) -> Float.compare(o1.getTemperature(), o2.getTemperature())).getTemperature();
+        }
     }
 
     private void splitDay() {

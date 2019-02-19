@@ -4,19 +4,17 @@ import ru.wheelman.weather.WeatherApp;
 import ru.wheelman.weather.data.data_sources.databases.CurrentWeatherLocalDataSource;
 import ru.wheelman.weather.data.data_sources.databases.ForecastedWeatherLocalDataSource;
 import ru.wheelman.weather.data.data_sources.databases.room.Database;
+import ru.wheelman.weather.data.data_sources.network.IOpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.OpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.current.CurrentWeatherRemoteDataSource;
 import ru.wheelman.weather.data.data_sources.network.current.CurrentWeatherRemoteDataSourceImpl;
-import ru.wheelman.weather.data.data_sources.network.current.CurrentWeatherService;
 import ru.wheelman.weather.data.data_sources.network.forecasted.ForecastedWeatherRemoteDataSource;
 import ru.wheelman.weather.data.data_sources.network.forecasted.ForecastedWeatherRemoteDataSourceImpl;
-import ru.wheelman.weather.data.data_sources.network.forecasted.ForecastedWeatherService;
 import ru.wheelman.weather.data.repositories.CurrentWeatherRepository;
 import ru.wheelman.weather.data.repositories.CurrentWeatherRepositoryImpl;
 import ru.wheelman.weather.data.repositories.ForecastedWeatherRepository;
 import ru.wheelman.weather.data.repositories.ForecastedWeatherRepositoryImpl;
-import ru.wheelman.weather.di.providers.CurrentWeatherServiceProvider;
-import ru.wheelman.weather.di.providers.ForecastedWeatherServiceProvider;
+import ru.wheelman.weather.di.providers.OpenWeatherAPIProvider;
 import ru.wheelman.weather.domain.interactors.CurrentWeatherInteractor;
 import ru.wheelman.weather.domain.interactors.CurrentWeatherInteractorImpl;
 import ru.wheelman.weather.domain.interactors.ForecastedWeatherInteractor;
@@ -40,8 +38,7 @@ public class WeatherAppModule extends Module {
 
         bind(OpenWeatherAPI.class);
 
-        bind(CurrentWeatherService.class).toProvider(CurrentWeatherServiceProvider.class);
-        bind(ForecastedWeatherService.class).toProvider(ForecastedWeatherServiceProvider.class);
+        bind(IOpenWeatherAPI.class).toProvider(OpenWeatherAPIProvider.class);
 
         bind(CurrentWeatherRemoteDataSource.class).to(CurrentWeatherRemoteDataSourceImpl.class);
         bind(ForecastedWeatherRemoteDataSource.class).to(ForecastedWeatherRemoteDataSourceImpl.class);

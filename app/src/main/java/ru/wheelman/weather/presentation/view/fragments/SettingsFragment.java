@@ -22,7 +22,7 @@ import ru.wheelman.weather.presentation.utils.UpdateMethodSelector;
 import toothpick.Toothpick;
 
 public class SettingsFragment extends Fragment implements SettingsFragmentAdapter.Callback {
-
+    //todo: create update interval chooser
     public static final int UPDATE_INTERVAL_MILLISECONDS = 1000 * 60 * 60; // 60 min;
 
     @Inject

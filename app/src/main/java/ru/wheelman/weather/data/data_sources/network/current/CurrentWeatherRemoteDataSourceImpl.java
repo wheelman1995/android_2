@@ -6,6 +6,7 @@ import java.util.Calendar;
 import javax.inject.Inject;
 
 import retrofit2.Response;
+import ru.wheelman.weather.data.data_sources.network.IOpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.OpenWeatherAPI;
 import ru.wheelman.weather.data.data_sources.network.UnitsMapper;
 import ru.wheelman.weather.data.data_sources.network.current.model.CurrentWeather;
@@ -18,7 +19,7 @@ import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 @ApplicationScope
 public class CurrentWeatherRemoteDataSourceImpl implements CurrentWeatherRemoteDataSource {
 
-    private final CurrentWeatherService currentWeatherService;
+    private final IOpenWeatherAPI openWeatherAPI;
 
     @Inject
     PreferenceHelper preferenceHelper;
@@ -28,8 +29,8 @@ public class CurrentWeatherRemoteDataSourceImpl implements CurrentWeatherRemoteD
     String apiKey;
 
     @Inject
-    public CurrentWeatherRemoteDataSourceImpl(CurrentWeatherService currentWeatherService) {
-        this.currentWeatherService = currentWeatherService;
+    public CurrentWeatherRemoteDataSourceImpl(IOpenWeatherAPI openWeatherAPI) {
+        this.openWeatherAPI = openWeatherAPI;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class CurrentWeatherRemoteDataSourceImpl implements CurrentWeatherRemoteD
         String mUnits = UnitsMapper.mapUnits(units);
 
         try {
-            Response<CurrentWeather> response = currentWeatherService.loadWeatherData(preferenceHelper.getLatestCityId(), mUnits, apiKey).execute();
+            Response<CurrentWeather> response = openWeatherAPI.loadWeatherData(preferenceHelper.getLatestCityId(), mUnits, apiKey).execute();
             if (response.isSuccessful()) {
                 return mapResponse(response, units);
             }
@@ -57,7 +58,7 @@ public class CurrentWeatherRemoteDataSourceImpl implements CurrentWeatherRemoteD
         String mUnits = UnitsMapper.mapUnits(units);
 
         try {
-            Response<CurrentWeather> response = currentWeatherService.loadWeatherDataByCoordinates(
+            Response<CurrentWeather> response = openWeatherAPI.loadWeatherDataByCoordinates(
                     preferenceHelper.getLatitude(),
                     preferenceHelper.getLongitude(),
                     mUnits,
@@ -86,7 +87,7 @@ public class CurrentWeatherRemoteDataSourceImpl implements CurrentWeatherRemoteD
                 .setCountry(body.getSys().getCountry())
                 .setSunrise(body.getSys().getSunrise())
                 .setSunset(body.getSys().getSunset())
-                .setDataReceivingTime(body.getDt())
+                .setDataReceivingTime(body.getDt() * 1000L)
                 .setTemperature(body.getMain().getTemp())
                 .setWeatherConditionId(body.getWeather()[0].getId())
                 .setWeatherConditionGroup(body.getWeather()[0].getMain())

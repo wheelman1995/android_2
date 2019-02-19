@@ -5,10 +5,6 @@ import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
-import ru.wheelman.weather.data.data_sources.network.current.CurrentWeatherService;
-import ru.wheelman.weather.data.data_sources.network.forecasted.ForecastedWeatherService;
 import ru.wheelman.weather.di.scopes.ApplicationScope;
 
 @ApplicationScope
@@ -24,8 +20,7 @@ public class OpenWeatherAPI {
     static final int FORECAST_LENGTH_IN_DAYS = 5;
     private static final String BASE_URL = "https://api.openweathermap.org";
     private final OkHttpClient httpClient;
-    private ForecastedWeatherService forecastedWeatherService;
-    private CurrentWeatherService currentWeatherService;
+    private IOpenWeatherAPI openWeatherAPI;
 
     @Inject
     public OpenWeatherAPI() {
@@ -36,35 +31,17 @@ public class OpenWeatherAPI {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
-        currentWeatherService = createCurrentWeatherService();
-        forecastedWeatherService = createForecastedWeatherService();
-    }
-
-    private ForecastedWeatherService createForecastedWeatherService() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(SimpleXmlConverterFactory.create())
+                .addConverterFactory(new XmlOrJsonConverterFactory())
                 .client(httpClient)
                 .build();
 
-        return retrofit.create(ForecastedWeatherService.class);
+        openWeatherAPI = retrofit.create(IOpenWeatherAPI.class);
+
     }
 
-    private CurrentWeatherService createCurrentWeatherService() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(httpClient)
-                .build();
-
-        return retrofit.create(CurrentWeatherService.class);
-    }
-
-    public ForecastedWeatherService getForecastedWeatherService() {
-        return forecastedWeatherService;
-    }
-
-    public CurrentWeatherService getCurrentWeatherService() {
-        return currentWeatherService;
+    public IOpenWeatherAPI getOpenWeatherAPI() {
+        return openWeatherAPI;
     }
 }

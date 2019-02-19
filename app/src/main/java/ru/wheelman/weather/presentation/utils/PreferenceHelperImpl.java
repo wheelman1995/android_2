@@ -295,7 +295,7 @@ public class PreferenceHelperImpl implements PreferenceHelper {
         if (!latestCityIdListeners.contains(latestCityIdListener)) {
             checkOnSharedPreferenceChangeListenerIsRegistered();
             latestCityIdListeners.add(latestCityIdListener);
-            latestCityIdListener.latestCityIdChanged();
+//            latestCityIdListener.latestCityIdChanged();
         }
     }
 

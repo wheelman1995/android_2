@@ -28,6 +28,8 @@
             android:id="@+id/rv_fragment_forecast"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:adapter="@{fragment.adapter}"
+            app:addItemDecoration="@{fragment.dividerItemDecoration}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
 
         </androidx.recyclerview.widget.RecyclerView>
