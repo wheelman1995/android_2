@@ -23,10 +23,9 @@ public class ForecastedWeatherFragmentAdapter extends RecyclerView.Adapter<Forec
     private Disposable disposable;
 
     @Inject
-    public ForecastedWeatherFragmentAdapter(IBindingAdapters bindingComponent, AdapterViewModel adapterViewModel) {
+    ForecastedWeatherFragmentAdapter(IBindingAdapters bindingComponent, AdapterViewModel adapterViewModel) {
         this.bindingComponent = bindingComponent;
         this.adapterViewModel = adapterViewModel;
-
         initListeners();
     }
 
@@ -70,11 +69,10 @@ public class ForecastedWeatherFragmentAdapter extends RecyclerView.Adapter<Forec
         }
     }
 
-    //todo subscribe to item count changes and notify data set change then.
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         private RecyclerViewFragmentForecastItemBinding binding;
 
-        public ViewHolder(RecyclerViewFragmentForecastItemBinding binding) {
+        ViewHolder(RecyclerViewFragmentForecastItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

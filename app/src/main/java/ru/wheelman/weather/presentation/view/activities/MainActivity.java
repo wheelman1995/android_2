@@ -21,12 +21,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ObservableInt;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -53,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     static final int NUMBER_OF_PAGES = 2;
     private static final String TAG = "MainActivity";
     private static final int PERMISSION_REQUEST_CODE = 0;
-
+    private static final float DRAWER_ARROW_DRAWABLE_PROGRESS_BACK_ARROW = 1.0f;
+    private static final float DRAWER_ARROW_DRAWABLE_PROGRESS_HAMBURGER = 0.0f;
     @Inject
     MainActivityViewModel viewModel;
     @Inject
@@ -79,7 +82,12 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout.DrawerListener drawerListener;
     private ActivityMainBinding binding;
     private NavDrawerHeaderBinding navDrawerHeaderBinding;
+    private DrawerArrowDrawable drawerArrowDrawable;
+    private ObservableInt viewPagerCurrentItem;
 
+    public ObservableInt getViewPagerCurrentItem() {
+        return viewPagerCurrentItem;
+    }
 
     @Override
     public void onAttachedToWindow() {
@@ -138,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initVariables() {
         pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        drawerArrowDrawable = new DrawerArrowDrawable(this);
+        viewPagerCurrentItem = new ObservableInt();
     }
 
     private void initUi(ActivityMainBinding binding) {
@@ -150,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setTitle(null);
         actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        actionbar.setHomeAsUpIndicator(drawerArrowDrawable);
     }
 
 
@@ -208,7 +218,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
 
             if (feedbackFragment != null && feedbackFragment.isVisible() || settingsFragment != null && settingsFragment.isVisible()) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+//                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+                drawerArrowDrawable.setProgress(DRAWER_ARROW_DRAWABLE_PROGRESS_BACK_ARROW);
                 homeReturnsUp = true;
                 return;
             }
@@ -225,19 +236,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            drawerArrowDrawable.setProgress(DRAWER_ARROW_DRAWABLE_PROGRESS_HAMBURGER);
             homeReturnsUp = false;
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+//            getSupportActionBar().setHomeAsUpIndicator(drawerArrowDrawable);
+
         });
 
         pageChangeListener = new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                Log.d(TAG, "positionOffset: " + positionOffset + " position " + position);
 
+                setPosition(position, positionOffset);
+            }
+
+            private void setPosition(int position, float positionOffset) {
+                if (position == 1) {
+                    drawerArrowDrawable.setProgress(1f);
+                } else {
+                    drawerArrowDrawable.setProgress(positionOffset);
+                }
             }
 
             @Override
             public void onPageSelected(int position) {
-
+                Log.d(TAG, "onPageSelected: " + position);
+                homeReturnsUp = position > 0;
+                viewPagerCurrentItem.set(position);
             }
 
             @Override
@@ -291,10 +316,12 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerOpened(@NonNull View drawerView) {
 
             }
+
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
 
             }
+
             @Override
             public void onDrawerStateChanged(int newState) {
 
@@ -321,9 +348,7 @@ public class MainActivity extends AppCompatActivity {
                 .setIcon(R.drawable.rationale_icon)
                 .setMessage(R.string.location_permission_rationale)
                 .setPositiveButton(R.string.location_permission_rationale_positive_button, null)
-                .setOnDismissListener(dialog -> {
-                    requestPermissions();
-                });
+                .setOnDismissListener(dialog -> requestPermissions());
         builder.create().show();
     }
 
@@ -455,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
             case android.R.id.home:
                 if (homeReturnsUp) {
                     homeReturnsUp = false;
-                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                    drawerArrowDrawable.setProgress(DRAWER_ARROW_DRAWABLE_PROGRESS_HAMBURGER);
                     onBackPressed();
                 } else {
                     drawerLayout.openDrawer(GravityCompat.START);
@@ -470,6 +495,8 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (viewPagerCurrentItem.get() > 0) {
+            viewPagerCurrentItem.set(viewPagerCurrentItem.get() - 1);
         } else {
             super.onBackPressed();
         }

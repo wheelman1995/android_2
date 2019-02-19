@@ -6,7 +6,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        def VERSION_MAJOR = 4
+        def VERSION_MAJOR = 5
         def VERSION_MINOR = 0
         def VERSION_PATCH = 0
 
