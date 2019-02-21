@@ -8,7 +8,7 @@ android {
     defaultConfig {
         def VERSION_MAJOR = 5
         def VERSION_MINOR = 0
-        def VERSION_PATCH = 0
+        def VERSION_PATCH = 1
 
         applicationId 'ru.wheelman.weather'
         minSdkVersion 21

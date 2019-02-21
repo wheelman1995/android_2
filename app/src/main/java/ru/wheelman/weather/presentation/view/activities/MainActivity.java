@@ -40,6 +40,7 @@ import ru.wheelman.weather.databinding.NavDrawerHeaderBinding;
 import ru.wheelman.weather.di.modules.MainActivityModule;
 import ru.wheelman.weather.di.scopes.ApplicationScope;
 import ru.wheelman.weather.di.scopes.MainActivityScope;
+import ru.wheelman.weather.presentation.utils.DisplayMetricsHelper;
 import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 import ru.wheelman.weather.presentation.view.fragments.AboutFragment;
 import ru.wheelman.weather.presentation.view.fragments.CurrentWeatherFragment;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 0;
     private static final float DRAWER_ARROW_DRAWABLE_PROGRESS_BACK_ARROW = 1.0f;
     private static final float DRAWER_ARROW_DRAWABLE_PROGRESS_HAMBURGER = 0.0f;
+    @Inject
+    DisplayMetricsHelper displayMetricsHelper;
     @Inject
     MainActivityViewModel viewModel;
     @Inject
@@ -274,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
         drawerListener = new DrawerLayout.DrawerListener() {
             private AppCompatImageView navDrawerHeaderForegroundImage = navDrawerHeaderBinding.imageNavDrawerHeaderForeground;
 
-            private int dpi = getResources().getDisplayMetrics().densityDpi;
             private ConstraintLayout.LayoutParams foregroundImageLayoutParams = (ConstraintLayout.LayoutParams) navDrawerHeaderForegroundImage.getLayoutParams();
 
             private int foregroundImageWidth = foregroundImageLayoutParams.width; //in pixels
@@ -283,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
             private int foregroundImageOriginalX = foregroundImageLayoutParams.editorAbsoluteX; // in pixels
 
             private int foregroundImageEndX = navigationView.getLayoutParams().width / 2 - foregroundImageWidth / 2;
-            private int foregroundImageEndY = 20 * (dpi / 160); //20 in dp
+            private int foregroundImageEndY = displayMetricsHelper.dpToPx(20);
 
             private int h = foregroundImageEndX;
             private int k = (foregroundImageEndX * foregroundImageEndX - 2 * foregroundImageEndX * h + foregroundImageEndY * foregroundImageEndY - foregroundImageOriginalX * foregroundImageOriginalX + 2 * foregroundImageOriginalX * h - foregroundImageOriginalY * foregroundImageOriginalY) / (-2 * foregroundImageOriginalY + 2 * foregroundImageEndY);

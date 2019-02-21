@@ -77,7 +77,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
-            app:imageURL="@{adapter.weatherIconURLs[(safeUnbox(position))]}"
+            imageURL="@{adapter.weatherIconURLs[(safeUnbox(position))]}"
             android:layout_marginEnd="112dp"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"

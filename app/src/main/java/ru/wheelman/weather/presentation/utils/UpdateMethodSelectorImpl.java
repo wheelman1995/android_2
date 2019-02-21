@@ -13,14 +13,20 @@ import ru.wheelman.weather.presentation.utils.worker.forecasted.ForecastedWeathe
 @ApplicationScope
 public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     private static final String TAG = UpdateMethodSelectorImpl.class.getSimpleName();
-    private CurrentWeatherUpdateWorkerHelper currentWeatherUpdateWorkerHelper;
-    private ForecastedWeatherUpdateWorkerHelper forecastedWeatherUpdateWorkerHelper;
-    //    private WeatherUpdateTrigger weatherUpdateTrigger;
-//    private WeatherUpdateByLocationTrigger weatherUpdateByLocationTrigger;
-    private PreferenceHelper preferenceHelper;
-    private LocationHelper locationHelper;
-    private ISearchSuggestionsProvider suggestionsProvider;
-    private IConnectivityHelper connectivityHelper;
+
+    @Inject
+    CurrentWeatherUpdateWorkerHelper currentWeatherUpdateWorkerHelper;
+    @Inject
+    ForecastedWeatherUpdateWorkerHelper forecastedWeatherUpdateWorkerHelper;
+    @Inject
+    PreferenceHelper preferenceHelper;
+    @Inject
+    LocationHelper locationHelper;
+    @Inject
+    ISearchSuggestionsProvider suggestionsProvider;
+    @Inject
+    IConnectivityHelper connectivityHelper;
+
     private MutableLiveData<Boolean> internetConnected;
 
     @Inject
@@ -33,45 +39,15 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
         return internetConnected;
     }
 
-    @Inject
-    void setConnectivityHelper(IConnectivityHelper connectivityHelper) {
-        this.connectivityHelper = connectivityHelper;
-    }
-
     private boolean checkInternetConnected() {
         boolean internetConnected = connectivityHelper.isInternetConnected();
         this.internetConnected.setValue(internetConnected);
         return internetConnected;
     }
 
-    @Inject
-    void setSuggestionsProvider(ISearchSuggestionsProvider suggestionsProvider) {
-        this.suggestionsProvider = suggestionsProvider;
-    }
-
-    @Inject
-    void setLocationHelper(LocationHelper locationHelper) {
-        this.locationHelper = locationHelper;
-    }
-
-    @Inject
-    void setCurrentWeatherUpdateWorkerHelper(CurrentWeatherUpdateWorkerHelper currentWeatherUpdateWorkerHelper) {
-        this.currentWeatherUpdateWorkerHelper = currentWeatherUpdateWorkerHelper;
-    }
-
-    @Inject
-    void setForecastedWeatherUpdateWorkerHelper(ForecastedWeatherUpdateWorkerHelper forecastedWeatherUpdateWorkerHelper) {
-        this.forecastedWeatherUpdateWorkerHelper = forecastedWeatherUpdateWorkerHelper;
-    }
-
-    @Inject
-    void setPreferenceHelper(PreferenceHelper preferenceHelper) {
-        this.preferenceHelper = preferenceHelper;
-    }
-
-
     @Override
     public void selectAndUpdate(int cityId) {
+        checkInternetConnected();
 
         if (suggestionsProvider.useYourLocationWasSelected(cityId)) {
             safeStartListeningToLocationChanges();
@@ -84,12 +60,10 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     }
 
     private void updateByCityId() {
-        if (checkInternetConnected()) {
-            if (preferenceHelper.cityIdIsValid()) {
-                setDataIsBeingUpdated();
-                currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCityId();
-                forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCityId();
-            }
+        if (preferenceHelper.cityIdIsValid()) {
+            setDataIsBeingUpdated();
+            currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCityId();
+            forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCityId();
         }
     }
 
@@ -100,6 +74,8 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
 
     @Override
     public void selectAndUpdate() {
+        checkInternetConnected();
+
         if (preferenceHelper.isListeningToLocationChanges()) {
             forceRestartLocationListener();
         } else {
@@ -108,36 +84,24 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     }
 
     private void forceRestartLocationListener() {
-        if (checkInternetConnected()) {
-            locationHelper.stopListeningToLocationChanges();
-            locationHelper.startListeningToLocationChanges();
-        }
+        locationHelper.stopListeningToLocationChanges();
+        locationHelper.startListeningToLocationChanges();
     }
 
     @Override
     public void updateByCoordinates() {
-        if (checkInternetConnected()) {
-            if (locationHelper.coordinatesAreValid()) {
-                setDataIsBeingUpdated();
-                currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCoordinates();
-                forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCoordinates();
-            }
+        if (locationHelper.coordinatesAreValid()) {
+            setDataIsBeingUpdated();
+            currentWeatherUpdateWorkerHelper.updateCurrentWeatherConditionsByCoordinates();
+            forecastedWeatherUpdateWorkerHelper.updateFiveDayForecastByCoordinates();
         }
     }
-
-//    @Inject
-//    public void setWeatherUpdateTrigger(WeatherUpdateTrigger weatherUpdateTrigger) {
-//        this.weatherUpdateTrigger = weatherUpdateTrigger;
-//    }
-
-//    @Inject
-//    void setWeatherUpdateByLocationTrigger(WeatherUpdateByLocationTrigger weatherUpdateByLocationTrigger) {
-//        this.weatherUpdateByLocationTrigger = weatherUpdateByLocationTrigger;
-//    }
 
 
     @Override
     public void appRestoredWithoutLocationServices() {
+        checkInternetConnected();
+
         if (preferenceHelper.isListeningToLocationChanges()) {
             locationHelper.stopListeningToLocationChanges();
             updateByCityId();
@@ -146,12 +110,11 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
 
     @Override
     public void onAppNormalStart(boolean updateByLocationAllowed) {
+        checkInternetConnected();
 
         if (updateByLocationAllowed && preferenceHelper.isListeningToLocationChanges()) {
             Log.d(TAG, "onAppNormalStart perm list");
-            if (checkInternetConnected()) {
-                locationHelper.startListeningToLocationChanges();
-            }
+            locationHelper.startListeningToLocationChanges();
             return;
         }
 
@@ -166,6 +129,8 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
 
     @Override
     public void onAppFirstStart(boolean updateByLocationAllowed) {
+        checkInternetConnected();
+
         if (updateByLocationAllowed) {
             Log.d(TAG, "onAppFirstStart updateByLocationAllowed");
             safeStartListeningToLocationChanges();
@@ -176,10 +141,8 @@ public class UpdateMethodSelectorImpl implements UpdateMethodSelector {
     }
 
     private void safeStartListeningToLocationChanges() {
-        if (checkInternetConnected()) {
-            if (!preferenceHelper.isListeningToLocationChanges()) {
-                locationHelper.startListeningToLocationChanges();
-            }
+        if (!preferenceHelper.isListeningToLocationChanges()) {
+            locationHelper.startListeningToLocationChanges();
         }
     }
 

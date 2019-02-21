@@ -8,6 +8,8 @@ import ru.wheelman.weather.di.qualifiers.ApiKeyQualifier;
 import ru.wheelman.weather.presentation.data_binding.BindingAdapters;
 import ru.wheelman.weather.presentation.data_binding.IBindingAdapters;
 import ru.wheelman.weather.presentation.utils.ConnectivityHelper;
+import ru.wheelman.weather.presentation.utils.DisplayMetricsHelper;
+import ru.wheelman.weather.presentation.utils.DisplayMetricsHelperImpl;
 import ru.wheelman.weather.presentation.utils.IConnectivityHelper;
 import ru.wheelman.weather.presentation.utils.PreferenceHelper;
 import ru.wheelman.weather.presentation.utils.PreferenceHelperImpl;
@@ -21,6 +23,7 @@ public class AppModule extends Module {
         bind(PreferenceHelper.class).to(PreferenceHelperImpl.class);
         bind(IBindingAdapters.class).to(BindingAdapters.class);
         bind(IConnectivityHelper.class).to(ConnectivityHelper.class);
+        bind(DisplayMetricsHelper.class).to(DisplayMetricsHelperImpl.class);
     }
 
 }

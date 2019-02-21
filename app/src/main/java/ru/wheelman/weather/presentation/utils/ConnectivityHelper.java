@@ -22,6 +22,6 @@ public class ConnectivityHelper implements IConnectivityHelper {
     @Override
     public boolean isInternetConnected() {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 }
