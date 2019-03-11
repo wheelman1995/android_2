@@ -38,6 +38,8 @@ public class CurrentWeatherRepositoryImpl implements CurrentWeatherRepository {
     }
 
     private void saveToLocalDataSource(CurrentWeatherConditions currentWeatherConditions) {
-        currentWeatherLocalDataSource.saveCurrentWeatherConditions(currentWeatherConditions);
+        if (currentWeatherConditions != null) {
+            currentWeatherLocalDataSource.saveCurrentWeatherConditions(currentWeatherConditions);
+        }
     }
 }

@@ -57,13 +57,6 @@ public class SettingsFragment extends Fragment implements SettingsFragmentAdapte
     }
 
     @Override
-    public void onViewAttachedToWindow(int position) {
-        if (position == unitIndex) {
-            ((RadioButton) tempSettingRV.getChildAt(position)).setChecked(true);
-        }
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -83,7 +76,7 @@ public class SettingsFragment extends Fragment implements SettingsFragmentAdapte
 
         tempSettingRV.setLayoutManager(new LinearLayoutManager(view.getContext(), RecyclerView.VERTICAL, false));
 
-        adapter = new SettingsFragmentAdapter(getResources().getStringArray(R.array.temp_setting_values), this);
+        adapter = new SettingsFragmentAdapter(getResources().getStringArray(R.array.temp_setting_values), this, unitIndex);
         tempSettingRV.setAdapter(adapter);
         tempSettingRV.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));
 

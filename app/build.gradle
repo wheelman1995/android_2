@@ -8,7 +8,7 @@ android {
     defaultConfig {
         def VERSION_MAJOR = 5
         def VERSION_MINOR = 0
-        def VERSION_PATCH = 1
+        def VERSION_PATCH = 2
 
         applicationId 'ru.wheelman.weather'
         minSdkVersion 21
@@ -58,6 +58,7 @@ android {
     packagingOptions {
         exclude 'META-INF/proguard/androidx-annotations.pro'
     }
+
     sourceSets { main { assets.srcDirs = ['src/main/assets'] } }
 
     dataBinding {
@@ -102,7 +103,6 @@ dependencies {
     //navigation
     implementation 'android.arch.navigation:navigation-fragment:1.0.0-beta02'
     implementation 'android.arch.navigation:navigation-ui:1.0.0-beta02'
-    // use -ktx for Kotlin
     //toothpick
     implementation 'com.github.stephanenicolas.toothpick:toothpick-runtime:2.1.0'
     implementation 'com.github.stephanenicolas.toothpick:smoothie-androidx:2.1.0'

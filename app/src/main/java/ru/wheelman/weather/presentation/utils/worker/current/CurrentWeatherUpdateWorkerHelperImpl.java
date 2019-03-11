@@ -21,10 +21,6 @@ import static ru.wheelman.weather.presentation.utils.worker.WorkerConstants.TAG_
 @ApplicationScope
 public class CurrentWeatherUpdateWorkerHelperImpl implements CurrentWeatherUpdateWorkerHelper {
 
-    static final String INPUT_DATA_KEY_CITY_ID = "city_id";
-    static final String INPUT_DATA_KEY_LATITUDE = "latitude";
-    static final String INPUT_DATA_KEY_LONGITUDE = "longitude";
-    static final String INPUT_DATA_KEY_UNITS = "units";
     private static final String UNIQUE_WORK_NAME_UPDATE_CURRENT_WEATHER = "update_current_weather";
 
     @Inject

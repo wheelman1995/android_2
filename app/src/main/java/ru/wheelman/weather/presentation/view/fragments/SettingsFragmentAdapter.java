@@ -10,11 +10,13 @@ import ru.wheelman.weather.R;
 
 public class SettingsFragmentAdapter extends RecyclerView.Adapter<SettingsFragmentAdapter.ViewHolder> {
     private String[] dataSet;
+    private int unitIndex;
     private Callback callback;
 
-    public SettingsFragmentAdapter(String[] dataSet, Callback callback) {
+    public SettingsFragmentAdapter(String[] dataSet, Callback callback, int unitIndex) {
         this.callback = callback;
         this.dataSet = dataSet;
+        this.unitIndex = unitIndex;
     }
 
     @NonNull
@@ -29,6 +31,9 @@ public class SettingsFragmentAdapter extends RecyclerView.Adapter<SettingsFragme
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        if (i == unitIndex) {
+            viewHolder.rb.setChecked(true);
+        }
         viewHolder.rb.setText(dataSet[i]);
         viewHolder.rb.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -43,16 +48,8 @@ public class SettingsFragmentAdapter extends RecyclerView.Adapter<SettingsFragme
         return dataSet.length;
     }
 
-    @Override
-    public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        callback.onViewAttachedToWindow(holder.getLayoutPosition());
-    }
-
     public interface Callback {
         void onListItemCheckedChanged(int i);
-
-        void onViewAttachedToWindow(int position);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -28,12 +28,18 @@ public class ForecastedWeatherRepositoryImpl implements ForecastedWeatherReposit
     @Override
     public void updateFiveDayForecastByCityId() {
         FiveDayForecast fiveDayForecast = forecastedWeatherRemoteDataSource.requestFiveDayForecastByCityId();
-        forecastedWeatherLocalDataSource.saveFiveDayForecast(fiveDayForecast);
+        saveToLocalDataSource(fiveDayForecast);
     }
 
     @Override
     public void updateFiveDayForecastByCoordinates() {
         FiveDayForecast fiveDayForecast = forecastedWeatherRemoteDataSource.requestFiveDayForecastByCoordinates();
-        forecastedWeatherLocalDataSource.saveFiveDayForecast(fiveDayForecast);
+        saveToLocalDataSource(fiveDayForecast);
+    }
+
+    private void saveToLocalDataSource(FiveDayForecast fiveDayForecast) {
+        if (fiveDayForecast != null) {
+            forecastedWeatherLocalDataSource.saveFiveDayForecast(fiveDayForecast);
+        }
     }
 }
